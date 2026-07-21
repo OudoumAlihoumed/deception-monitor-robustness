@@ -10,7 +10,7 @@
 > **Research question.** Not *how accurate is a deception monitor?* — but  
 > **how much does its accuracy degrade as a function of adversary effort?**
 
-This repository is the **code** for a robustness-gap protocol on deception monitors for AI agents: a black-box surface classifier, a white-box residual-stream probe, and a chain-of-thought control, evaluated against an ordered adversary-budget ladder \(b_1\!\rightarrow\!b_4\).
+This repository implements a **robustness-gap protocol** for deception monitors on AI agents: a black-box surface classifier, a white-box residual-stream probe, and a chain-of-thought control, evaluated against an ordered adversary-budget ladder \(b_1\!\rightarrow\!b_4\).
 
 **Author:** [Oudoum Ali Houmed](https://github.com/OudoumAlihoumed) · Université Paris-Saclay
 
@@ -19,6 +19,11 @@ This repository is the **code** for a robustness-gap protocol on deception monit
 ## Why this exists
 
 Linear probes on residual-stream activations report high held-out recall for strategic deception — but those numbers are usually measured against agents that are **not trying to evade the monitor**. Drawing on adversarial-robustness methodology ([Athalye et al., 2018](https://arxiv.org/abs/1802.00420); [Tramèr et al., 2020](https://arxiv.org/abs/2002.08347)) and the dual of [Sleeper Agents](https://arxiv.org/abs/2401.05566) (does *detection* persist under training aimed at evasion?), this project reports a **budget curve**, not a single accuracy number.
+
+<p align="center">
+  <img src="figures/scenario_figure1.png" width="92%" alt="What we measure: agentic deception under monitoring" />
+</p>
+<p align="center"><em><strong>What we measure.</strong> (A) Overseer, agent, covert goal, and three monitors that score the episode but do not define the label. (B) Operational definition: \(y{=}1\) iff the visible statement conflicts with the agent's internal fact <em>and</em> advances the covert goal. (C) Multi-turn episode with deceptive turn \(t^\star\). (D) Eight agentic elicitation families.</em></p>
 
 ---
 
@@ -56,6 +61,11 @@ Linear probes on residual-stream activations report high held-out recall for str
 
 **Key contrast:** \(b_2\) vs \(b_3\) — transfer under surface pressure vs adaptive targeting.
 
+<p align="center">
+  <img src="figures/methodology_figure1.png" width="92%" alt="Measurement protocol pipeline" />
+</p>
+<p align="center"><em><strong>Measurement protocol.</strong> Steps 1–5: paired scenarios and three monitors at 1% FPR. Step 6: adversary ladder \(b_0\)–\(b_4\). Steps 7–10: \(\Delta\mathrm{det}\), TOST retention gate, threshold drift, session-clustered inference. Step 11: primary contrast \(b_2\) (transfer) vs \(b_3\) (adaptive).</em></p>
+
 ---
 
 ## Repository layout
@@ -74,7 +84,8 @@ deception-monitor-robustness/
 ├── scripts/
 │   ├── run_pipeline_validation.py       # CPU synthetic validation
 │   ├── modal_app.py                     # full GPU ladder on Modal
-│   └── generate_figures.py              # optional figure generation
+│   └── generate_figures.py              # regenerate figures/
+├── figures/                             # README / protocol figures (PNG)
 ├── results/                             # JSON outputs (see honesty note)
 ├── requirements.txt
 └── LICENSE
@@ -125,10 +136,11 @@ modal run scripts/modal_app.py --n-sessions 60 --sft-steps 200
 Results land in `results/modal_experiment_results.json`.  
 **Never commit API tokens or `.env` files.**
 
-### 3 · Optional figures
+### 3 · Regenerate figures
 
 ```bash
 python scripts/generate_figures.py
+# copy / point outputs into figures/ for the README
 ```
 
 ---
@@ -137,13 +149,28 @@ python scripts/generate_figures.py
 
 | Component | Status |
 |-----------|--------|
+| Literature / definition / methodology (design) | Done |
 | Scenario / monitor / budget-ladder code | Done |
-| Evaluation stack (\(\Delta\mathrm{det}\), bootstrap, TOST gate) | Done |
+| Evaluation stack (\(\Delta\mathrm{det}\), bootstrap, TOST) | Done |
 | Modal GPU pipeline | Done (preliminary) |
 | Faithful probe-aware adaptive attack (\(b_3\)/\(b_4\)) | **Pending** (training probe must match eval probe) |
 | Adaptive defender (retrain / transfer) | Specified; not claimed as finished measurement |
 
 Preliminary Modal numbers exist; **adaptive rungs are not yet treated as conclusive** until the probe-aware wiring is verified.
+
+---
+
+## Illustrative results panels
+
+<p align="center">
+  <img src="figures/results_main.png" width="90%" alt="Primary recall and Δdet curves" />
+</p>
+<p align="center"><em><strong>Primary panels.</strong> Recall at 1% FPR across the budget ladder (surface / probe / CoT) and probe \(\Delta\mathrm{det}(b)\).</em></p>
+
+<p align="center">
+  <img src="figures/results_cross_monitor.png" width="90%" alt="Cross-monitor comparison" />
+</p>
+<p align="center"><em><strong>Cross-monitor view.</strong> Heatmap, \(\Delta\mathrm{det}\) by family, and outcome plane (surface gap vs probe gap).</em></p>
 
 ---
 
