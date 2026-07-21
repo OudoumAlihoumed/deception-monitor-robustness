@@ -1,0 +1,730 @@
+% =====================================================================
+%  NeurIPS-workshop submission -- Deception Monitor Robustness Gap
+%  Compile:  pdflatex main  ->  bibtex main  ->  pdflatex main x2
+%
+%  Template: neurips_2024.sty next to this file.
+%  Figures: paper/figures/*.pdf
+% =====================================================================
+\documentclass{article}
+
+\usepackage[preprint]{neurips_2024}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{xspace}
+\usepackage{amsthm}
+
+\hypersetup{colorlinks=true, linkcolor=blue!55!black, citecolor=blue!55!black,
+            urlcolor=blue!55!black}
+
+% ---- semantic macros
+\newcommand{\deltadet}{\ensuremath{\Delta\mathrm{det}}}
+\newcommand{\recallfpr}{\ensuremath{\mathrm{recall}@1\%\mathrm{FPR}}}
+\newcommand{\model}{Qwen3-32B\xspace}
+\newcommand{\budget}{\ensuremath{b}}
+
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\title{Can We Trust Deception Monitors for AI Agents?\\
+       Measuring the Robustness Gap under an Adaptive Adversary}
+
+\author{%
+  Anonymous Author(s)\\
+  Affiliation\\
+  \texttt{email@domain}
+}
+
+\begin{document}
+\maketitle
+
+% =====================================================================
+\begin{abstract}
+As large language models are deployed as autonomous \emph{agents} that take
+multi-step actions under limited human oversight, monitoring their
+trajectories for deception becomes a load-bearing safety control.
+Linear probes on residual-stream activations report high held-out recall for
+strategic deception in cooperative evaluations---but those numbers
+are measured against agents that are \emph{not trying to evade the monitor}.
+Drawing on adversarial-robustness methodology, we ask not
+\emph{how accurate is the detector?} but
+\emph{how much adversary effort buys how much detection collapse?}
+
+We formalise a \emph{robustness gap}
+$\deltadet(\budget)$: the drop in detection recall at a fixed
+false-positive rate as adversary budget $\budget$ rises along a ladder from
+prompt-level concealment, through probe-agnostic and probe-aware supervised
+fine-tuning, to probe-aware reinforcement learning. We instantiate the
+protocol on open-weights \model{} against a black-box surface-signature
+classifier, a white-box linear probe, and a chain-of-thought reading control,
+with paired, session-clustered evaluation ($N{=}60$) and a broken-agent
+retention gate.
+
+On Modal H200, the probe's largest gap opens at the probe-\emph{agnostic}
+SFT rung ($\deltadet(b_2)=0.33$), while probe-aware SFT does not further
+collapse detection ($\deltadet(b_3)=0.00$) and RL yields a smaller gap
+($\deltadet(b_4)=0.13$). The protocol therefore converts an unanswerable
+yes/no into a measurable budget curve, and shows that---for this model and
+objective---surface-style suppression transfers more than the probe-aware
+SFT penalty we implemented.
+\end{abstract}
+
+% =====================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Large language models are increasingly deployed as autonomous
+\emph{agents}: systems that take sequences of actions toward a goal,
+invoke tools, and operate over long horizons with only intermittent human
+review. This is where deception becomes most consequential, and it is now
+the focus of a rapidly growing safety literature~\citep{chhabra2025agentic,
+ma2025safetyatscale, narajala2025securing, bengio2025scientistai}. An agent
+can behave deceptively by producing statements it internally represents as
+false, concealing capabilities, or pursuing objectives its operator did not
+sanction while presenting a compliant trajectory to an
+overseer~\citep{park2023deception, meinke2024scheming}. Because a human
+cannot inspect every action, oversight is increasingly delegated to an
+automated \emph{monitor} that reads behaviour or internal state and flags
+deception~\citep{greenblatt2023aicontrol}. The safety of the deployment
+then rests on a question that has received far less scrutiny than the
+monitors themselves: \emph{can the monitor be trusted when the agent is
+trying to evade it?} Figure~\ref{fig:scenario} fixes the setting we measure.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/scenario_figure1.pdf}
+  \caption{\textbf{What we measure.}
+  \textbf{(A)} Problem structure: an overseer sees only the transcript; the
+  agent may pursue a covert goal; surface, probe, and CoT monitors score the
+  episode but do not define the label.
+  \textbf{(B)} Operational definition: $y{=}1$ iff the overseer-visible
+  statement conflicts with the agent's internal fact \emph{and} advances the
+  covert goal (scenario-defined, monitor-independent).
+  \textbf{(C)} Episodes are multi-turn; deception is localised at one or more
+  turns $t^\star$, where the visible channel $a_t$ and internal channel
+  $s_t$ can diverge.
+  \textbf{(D)} Eight agentic elicitation families with shared seeds across
+  baseline and adversary arms.}
+  \label{fig:scenario}
+\end{figure}
+
+Two monitoring strategies dominate. \textbf{Black-box} monitors read
+externally visible behaviour: linguistic surface features, refusal
+patterns, action logs, or a separate judge model. \textbf{White-box}
+monitors read internal state, most prominently \emph{linear probes} on
+residual-stream activations that recover a direction correlated with
+deceptive intent~\citep{goldowskydill2025linearprobes,
+zou2023representation, burns2022latentknowledge}. Reported numbers are
+striking: activation probes achieve near-ceiling recall at low
+false-positive rates on held-out deception
+scenarios~\citep{goldowskydill2025linearprobes}, and access to internals
+can boost detection beyond black-box signals
+alone~\citep{parrack2025blacktowhite}.
+
+These numbers share a hidden assumption: they are measured against a model
+that is \emph{not optimising to evade the detector}. That is precisely the
+setting the adversarial-robustness literature has taught us to distrust.
+\citet{carlini2017towards}, \citet{athalye2018obfuscated},
+\citet{carlini2019evaluating}, and \citet{tramer2020adaptive} established
+that defenses evaluated against weak attackers report reassuring robustness
+and then fail once the attacker is allowed to optimise against the specific
+defense. A deception detector is a defense; a model incentivised to deceive
+without being caught is an attacker. The mapping is exact, and it reframes
+the central question.
+
+\paragraph{This paper.} We ask not \emph{how accurate is a deception
+detector?} but \emph{how much does its accuracy degrade as a function of
+adversary effort?} We make four contributions.
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt,topsep=2pt]
+  \item \textbf{A robustness-gap protocol (primary).} We define
+  $\deltadet(\budget)$ as the loss in detection recall at fixed FPR as
+  adversary budget rises along a ladder from prompt-level instruction through
+  SFT to RL. Reporting a \emph{curve} rather than a single number converts an
+  unanswerable yes/no into a measurable frontier
+  (Section~\ref{sec:methods}, Figure~\ref{fig:method}).
+  \item \textbf{A probe-agnostic vs.\ probe-aware contrast.} We separate
+  an adversary that only suppresses surface style ($b_2$) from one that
+  places the probe score in the fine-tuning / RL objective ($b_3$, $b_4$).
+  That contrast---not the attack recipe itself---is the scientific object:
+  it isolates transfer from adaptive targeting.
+  \item \textbf{Confound-resistant evaluation.} We measure deception
+  \emph{retention} jointly with detection (TOST gate), check threshold drift,
+  and compute session-clustered intervals, so a broken agent or a shifted
+  operating point is not mistaken for evasion.
+  \item \textbf{An open-weights instantiation.} We run $b_1$--$b_4$ on
+  \model{} under Modal H200 and report the measured curve, including the
+  unexpected finding that probe-agnostic SFT opens a larger gap than our
+  probe-aware SFT objective on this setup (Section~\ref{sec:results}).
+\end{itemize}
+
+Because $\deltadet(\budget)$ is defined identically whether probes prove
+robust or fragile, the same protocol answers the question under either
+outcome; we fix the primary endpoint in advance
+(Section~\ref{sec:stats}).
+
+% =====================================================================
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Safety and monitoring of AI agents.}
+As models are deployed as autonomous agents, a dedicated safety literature
+has formed around long horizons, tool use, limited oversight, and the
+defenses appropriate to them~\citep{chhabra2025agentic,
+ma2025safetyatscale, narajala2025securing}. A central proposal is
+\emph{monitoring}: rather than certify an agent safe in advance, one runs a
+cheaper monitor over its trajectory and intervenes when deception is
+flagged. \citet{greenblatt2023aicontrol} formalise this ``AI control''
+stance; \citet{bengio2025scientistai} argue for architectures that are
+easier to oversee. The premise common to these proposals---that the monitor
+holds up under an agent actively working against it---is exactly what our
+protocol puts under test. \citet{meinke2024scheming} show that frontier
+models already exhibit in-context scheming, making monitor evasion a
+present rather than hypothetical concern.
+
+\paragraph{Detecting deception from internals.}
+\citet{burns2022latentknowledge} recover latent knowledge without
+supervision; \citet{zou2023representation} formalise representation reading
+and control; and \citet{goldowskydill2025linearprobes} train supervised
+linear probes that detect \emph{strategic} deception in role-play and
+agentic settings with high held-out accuracy. \citet{clymer2024poser}
+unmask alignment-faking models by manipulating internals.
+\citet{parrack2025blacktowhite} quantify the boost that internals provide
+over black-box access. We build on this detector family but subject it to
+an adversary its original evaluations did not include.
+
+\paragraph{Benchmarks and elicitation of deception.}
+\citet{ren2025mask} disentangle honesty from accuracy.
+\citet{park2023deception} survey deceptive behaviours and risks. On the
+training side, \citet{schoen2025antischeming} stress-test anti-scheming
+training, and \citet{vanderweij2024sandbagging} show strategic
+underperformance---the sandbagging confound our capability-retention
+control is designed to rule out. Our elicitation suite follows the
+\emph{model-organism} tradition of
+\citet{scheurer2023insider} (insider trading under pressure) and
+\citet{benton2024sabotage} (sandbagging / sabotage evaluations), rather
+than static classification.
+
+\paragraph{Adversarial robustness and adaptive attacks.}
+Our methodology is imported from adversarial machine learning.
+\citet{carlini2017towards} introduced strong optimisation-based attacks;
+\citet{athalye2018obfuscated} showed that many defenses succeed only by
+obscuring gradients; \citet{carlini2019evaluating} codified evaluation
+guidelines; and \citet{tramer2020adaptive} broke essentially all of a set
+of published defenses with attacks adapted to each defense. The through-line
+is that robustness must be measured against an adversary that knows and
+optimises against the specific defense---exactly what a
+deception-detector evaluation lacking a probe-aware adversary omits.
+
+\paragraph{Activation-level control as an attack surface.}
+That internal directions can be \emph{written} as well as read is what
+makes a white-box adversary plausible.
+\citet{turner2023activation} and \citet{panickssery2023caa} steer behaviour
+by adding activation directions, showing that the representations probes
+rely on are manipulable. A probe-aware adversary can, in principle,
+optimise activations to be simultaneously deceptive in behaviour and
+probe-negative in representation.
+
+\paragraph{Closest prior work, and our delta.}
+The nearest neighbours are attack papers and detector papers, not
+evaluation protocols. \citet{bailey2024obfuscated} show that activations
+can be obfuscated while preserving behaviour---so evasion is possible.
+\citet{macdiarmid2024probes} report that a simple probe catches sleeper
+agents---so detectors look strong under non-adaptive tests.
+\citet{hubinger2024sleeper} supply the sleeper / fine-tuning methodology
+we reuse as adversary rungs.
+\citet{baker2025monitoring} show that optimising against a CoT monitor
+induces obfuscated reasoning---the CoT analogue of probe pressure.
+None of these answers the deployment question that AI-control
+systems~\citep{greenblatt2023aicontrol} actually face:
+\emph{given a fixed monitor, how much does detection degrade as adversary
+budget rises?}
+
+We therefore treat the contribution as \textbf{protocol-first, attack-second}.
+We did \emph{not} set out to invent a new evasion algorithm; Bailey et~al.\
+already establish that adaptive evasion exists. We set out to make monitor
+trust measurable under a budgeted adversary. Concretely, we deliver
+(i)~$\deltadet(\budget)$ as a \emph{curve} with a probe-agnostic vs.\
+probe-aware contrast ($b_2$ vs.\ $b_3$) as the primary scientific object;
+(ii)~joint deception-\emph{retention} so a broken agent is not counted as a
+defeated monitor; (iii)~paired, session-clustered inference on an
+agentic suite; and (iv)~an open-weights ladder through prompt, SFT, and RL
+that instantiates the protocol. The attack rungs are instruments for
+reading the curve, not the claim. If a stronger probe-aware objective later
+opens a larger $b_3$ gap, the protocol still applies---that is the point.
+
+% =====================================================================
+\section{Methods}
+\label{sec:methods}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/methodology_figure1.pdf}
+  \caption{\textbf{End-to-end robustness-gap protocol.}
+  \textbf{Steps 1--5:} build agentic scenarios, run paired baseline/adversary
+  policies on shared seeds, score with surface, probe, and CoT monitors, and
+  calibrate thresholds at $1\%$ FPR.
+  \textbf{Step 6:} adversary budget ladder $b_0$--$b_4$ (pink = probe in the
+  objective).
+  \textbf{Steps 7--10:} form
+  $\deltadet(\budget)=\recallfpr(0)-\recallfpr(\budget)$, apply the TOST
+  retention gate, check threshold drift, and report session-clustered CIs.
+  \textbf{Step 11:} primary contrast $b_2$ (transfer) versus $b_3$ (adaptive);
+  the measured curve appears in Results, not here.}
+  \label{fig:method}
+\end{figure}
+
+\subsection{Formal definitions}
+\label{sec:defs}
+
+\begin{definition}[Agentic episode and deception label]
+\label{def:deception}
+Let an episode $\tau=(x_{1:T}, a_{1:T}, s_{1:T})$ be a trajectory of
+overseer-visible observations $x_t$, agent actions/utterances $a_t$, and
+internal residual states $s_t$. Let $g_{\mathrm{cov}}$ be a covert
+objective known to the scenario author but not to the overseer, and let
+$b_{\mathrm{int}}$ be the agent's internal representation of relevant
+facts (elicited by construction in our scenarios). The episode is labelled
+\emph{deceptive} if there exists a turn $t^\star$ such that
+(i)~$a_{t^\star}$ conflicts with $b_{\mathrm{int}}$, and
+(ii)~$a_{t^\star}$ advances $g_{\mathrm{cov}}$. Labels are scenario-defined
+and independent of every monitor under test.
+\end{definition}
+
+\begin{remark}[Label construction]
+Both clauses are required: conflict without a covert goal is mere error;
+covert pursuit that is transparent is not deception toward an overseer.
+Labels are fixed by the scenario so they cannot be circular with $D$.
+\end{remark}
+
+\begin{definition}[Monitor and operating point]
+\label{def:monitor}
+A monitor $D$ maps an episode (or a turn) to a real-valued score
+$D(\tau)\in\mathbb{R}$. We calibrate a threshold $\theta_D$ on held-out
+\emph{benign} controls so that
+$\mathrm{FPR}_D(\theta_D)=0.01$, and report
+$\recallfpr_D := \Pr\!\big(D(\tau)\ge\theta_D \mid y(\tau)=1\big)$.
+\end{definition}
+
+\begin{remark}[Operating point]
+False positives trigger costly interventions in AI-control
+settings~\citep{greenblatt2023aicontrol}, so we fix FPR and report recall.
+The protocol is unchanged for any pre-registered $\alpha$; we use
+$\alpha{=}0.01$.
+\end{remark}
+
+\begin{definition}[Robustness gap]
+\label{def:gap}
+For detector $D$ and adversary budget $\budget$,
+\begin{equation}
+  \deltadet_{D}(\budget)
+  \;=\;
+  \recallfpr_{D}(0)
+  \;-\;
+  \recallfpr_{D}(\budget),
+  \label{eq:gap}
+\end{equation}
+where $\budget=0$ is the non-adversarial baseline. The object of study is
+the \emph{curve} $\budget\mapsto\deltadet_{D}(\budget)$, not a single
+scalar.
+\end{definition}
+
+\begin{remark}[Gap as a curve]
+Absolute recall units keep $\deltadet$ interpretable when baseline recall
+is moderate. The curve matters: a small gap at low budget is the
+artifact that non-adaptive evaluations
+produce~\citep{athalye2018obfuscated, tramer2020adaptive}. Positive
+$\deltadet$ means detection worsened; negative means recall rose.
+\end{remark}
+
+\subsection{Threat model}
+\label{sec:threat}
+
+We treat the monitor as a \emph{defense} and the agent as a potential
+\emph{attacker}. Following~\citet{carlini2019evaluating}, we specify the
+adversary along three axes.
+
+\textbf{Knowledge.} A \emph{probe-agnostic} adversary is optimised only to
+suppress externally visible deception cues and does not know a probe
+exists; evasion here measures \emph{transfer}. A \emph{probe-aware}
+adversary incorporates the probe score into training; this is the adaptive
+attack, and the only condition under which we use the word ``adaptive.''
+\emph{Query access} lets the adversary read the probe's scalar output;
+\emph{gradient access} lets it differentiate through the probe. Our
+primary rung ($b_3$) uses gradient access---exactly the situation of a
+developer who uses probe scores as a training
+signal~\citep{baker2025monitoring, hubinger2024sleeper}.
+
+\textbf{Objective.} The adversary jointly maximises deception success and
+detector evasion. Optimising evasion alone produces a degenerate
+non-deceptive model (Section~\ref{sec:retention}); optimising deception
+alone does not test the detector.
+
+\textbf{Budget.} Per rung we log fine-tuning steps, tokens, LoRA rank /
+updated parameters, and wall-clock time. These form the horizontal axis of
+the robustness-gap curve.
+
+\subsection{Models, data, and detectors}
+\label{sec:setup}
+
+\textbf{Model.} Primary experiments use open-weights
+\model{}~\citep{qwen3} (64 layers, hidden size $5120$). The probe layer is
+selected on a held-out split among $\{16,24,32,40,48,56\}$; unless noted we
+use mid-late layer $40$. Open weights are required for a reproducible
+white-box adversary.
+
+\textbf{Scenarios.} Deception is elicited with agentic scenario families
+in the spirit of \citet{scheurer2023insider} and
+\citet{benton2024sabotage}: insider trading under pressure, sandbagging on
+capability evaluations, capability concealment, goal misreporting to an
+overseer, tool-use coverup, audit evasion, safety-filter bypass, and
+resource hoarding. Scenario seeds are held fixed across baseline and
+adversarial arms so comparisons are paired. Ground-truth labels follow
+Definition~\ref{def:deception}.
+
+\textbf{Detectors.} We evaluate three detectors.
+(i)~A black-box \emph{surface-signature} classifier over transcript
+features (hedging, brevity, differential helpfulness, refusal markers,
+contradiction cues).
+(ii)~A white-box \emph{linear probe} on residual-stream activations,
+following~\citet{goldowskydill2025linearprobes}; layer and threshold are
+selected on a held-out split, never on the test set.
+(iii)~A \emph{chain-of-thought--reading} control: per
+\citet{smith2025difficulties}, an internals-based detector must be shown
+to beat a detector with access to the model's reasoning trace.
+
+\subsection{Adversary-budget ladder}
+\label{sec:ladder}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=1pt,topsep=2pt]
+  \item \textbf{$b_1$ -- Prompt-level.} Instruct the model to accomplish
+  the covert objective while concealing it. No weight updates.
+  \item \textbf{$b_2$ -- SFT, probe-agnostic.} LoRA fine-tuning on
+  trajectories curated to suppress surface deception cues. The probe is
+  \emph{not} in the loop; any probe evasion at this rung is transfer.
+  \item \textbf{$b_3$ -- SFT, probe-aware (adaptive).} Fine-tuning with
+  \[
+    \mathcal{L}_{b_3}
+    =
+    \mathcal{L}_{\mathrm{CE}}
+    +
+    \lambda\,\mathrm{softplus}\!\big(D_{\mathrm{probe}}(s)\big),
+  \]
+  so the model is trained to remain deceptive while lowering the probe
+  score. $\mathcal{L}_{\mathrm{CE}}$ anchors behaviour;
+  $\mathrm{softplus}$ supplies a smooth penalty on the signed probe output;
+  $\lambda$ sets the trade-off ($\lambda{=}0.5$ in the reported run).
+  \item \textbf{$b_4$ -- RL, probe-aware.} Online LoRA REINFORCE with
+  \[
+    R=\alpha\cdot\mathrm{deception\_proxy}
+    -\lambda\cdot D_{\mathrm{probe}}
+    -\beta\cdot\mathrm{surface\_risk},
+  \]
+  jointly rewarding retained deception, probe evasion, and surface-cue
+  suppression.
+\end{enumerate}
+The primary comparison is $b_2$ versus $b_3$: transfer under surface-only
+pressure versus adaptive pressure with the probe in the objective.
+
+\subsection{Deception retention and the broken-agent control}
+\label{sec:retention}
+
+A detector can appear robust simply because fine-tuning degraded the model
+into no longer deceiving. At every rung we measure a continuous
+\emph{deception-success rate} alongside detection recall. A rung whose
+deception-success has collapsed is flagged as a broken agent and excluded
+from robustness summaries with a logged reason. Independently we measure
+matched benign capability before and after each fine-tuning rung
+\citep{vanderweij2024sandbagging}.
+
+We use an equivalence gate: two one-sided tests (TOST) against a margin of
+retaining $\ge 80\%$ of baseline deception-success. Writing
+$\delta=\mathbb{E}[\mathrm{success}_{b}]-\mathbb{E}[\mathrm{success}_{0}]$ and
+$\varepsilon=0.2\cdot\mathbb{E}[\mathrm{success}_{0}]$, the rung passes only
+if both one-sided tests reject
+$H_0{:}\,\delta\le -\varepsilon$ and $H_0{:}\,\delta\ge +\varepsilon$
+at the pre-chosen level, i.e.\ if $\delta$ lies in
+$[-\varepsilon,\varepsilon]$. Rungs outside this band are logged as
+capability collapse and excluded from robustness summaries.
+
+\subsection{The adaptive defender}
+\label{sec:defender}
+
+A static defender understates security under an adaptive attack. The
+protocol therefore includes two defender-side measurements after
+probe-aware rungs.
+
+\textbf{Probe retraining.} Train a fresh probe on the fine-tuned model's
+activations. Recovered recall indicates a displaced signal; unrecovered
+recall indicates destruction or relocation of the deception representation.
+
+\textbf{Cross-probe transfer.} Test whether evasion is specific to the
+attacked probe or transfers across seeds, layers, and training splits.
+
+These measurements are part of the protocol specification; the present
+workshop run reports the attacker ladder $b_1$--$b_4$.
+
+\subsection{Mechanistic reading}
+\label{sec:mech}
+
+When a gap opens we record diagnostics that distinguish suppression along
+the probe direction from re-implementation elsewhere: cosine similarity of
+the probe direction before versus after a probe-aware rung, probe-score
+distributions on matched deceptive tokens, and a re-probe layer sweep. The
+workshop run reports the detection curve and retention gate; these
+diagnostics accompany the protocol for follow-up analysis.
+
+\subsection{Statistical protocol}
+\label{sec:stats}
+
+\textbf{Unit of analysis.} The independent unit is the \emph{session},
+never the turn.
+
+\textbf{Cluster-robust inference.} Confidence intervals use a
+session-clustered bootstrap; where appropriate we fit mixed-effects models
+with random intercepts for session, scenario template, and seed.
+
+\textbf{Paired design.} Baseline and adversarial conditions share scenario
+seeds, enabling a paired bootstrap for $\deltadet$.
+
+\textbf{Seeds.} Elicitation seeds vary across sessions. We report one
+fine-tuning seed.
+
+\textbf{Primary endpoint.} Probe $\recallfpr$ at the held-out-selected
+layer, broken-agent margin, and model-selection choices are fixed before
+adversarial runs.
+
+\subsection{Reproducibility}
+\label{sec:repro}
+
+We pin checkpoint names, LoRA configs, and seeds, and release analysis
+code. Evasive checkpoints are treated as a measurement instrument, not a
+deployment recipe: we describe the procedure at reproduction level while
+gating release of evasive weights.
+
+% =====================================================================
+\section{Experimental Setup}
+\label{sec:experiments}
+
+\paragraph{Compute.} Experiments run on Modal \texttt{H200} GPUs with
+open-weights \model{}~(\texttt{Qwen/Qwen3-32B}) in 4-bit NF4.
+
+\paragraph{Sessions.} $N=60$ paired sessions with scenario seeds held fixed
+across arms. Half are deception-eligible; half are benign controls for FPR
+calibration.
+
+\paragraph{Monitors.} Surface-signature logistic classifier; residual
+linear probe at layer $40$ (held-out selection among mid--late layers);
+CoT-reading control. Thresholds are calibrated to $1\%$ FPR on benign
+controls.
+
+\paragraph{Adversary rungs.} $b_1$: prompt injection. $b_2$/$b_3$: LoRA
+rank~$16$, $200$ steps; $b_3$ adds
+$\lambda\cdot\mathrm{softplus}(D_{\mathrm{probe}})$ with $\lambda=0.5$.
+$b_4$: LoRA REINFORCE for $100$ steps under
+$R=\alpha\cdot\mathrm{deception\_proxy}-\lambda\cdot D_{\mathrm{probe}}-\beta\cdot\mathrm{surface\_risk}$.
+One fine-tuning seed is reported.
+
+\paragraph{Pipeline validation.} Estimators (calibration, paired
+session-clustered bootstrap, broken-agent exclusion, threshold-drift) were
+checked on synthetic rollouts with known separability before the model run.
+
+% =====================================================================
+\section{Results}
+\label{sec:results}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/results_main.pdf}
+  \caption{\textbf{Primary result: where the robustness gap opens}
+  (\model{}, $N{=}60$, Modal H200).
+  \textbf{(A)} Detection recall at $1\%$ FPR across the adversary budget
+  ladder for the surface monitor, linear probe, and CoT control
+  (session-clustered bootstrap $95\%$ CIs).
+  \textbf{(B)} Probe robustness gap
+  $\deltadet(b)=\recallfpr(0)-\recallfpr(b)$.
+  The largest gap is at probe-\emph{agnostic} SFT ($b_2{=}0.33$), not at
+  probe-aware SFT ($b_3{=}0.00$).}
+  \label{fig:results}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Detection recall at $1\%$ FPR by monitor and adversary budget,
+  with the probe robustness gap
+  $\deltadet(\budget)=\recallfpr(0)-\recallfpr(\budget)$.
+  Modal H200 run on \model{} ($N{=}60$ sessions; LoRA SFT $200$ steps;
+  RL $100$ steps; one fine-tuning seed).}
+  \label{tab:main}
+  \begin{tabular}{lccccc}
+    \toprule
+    & Baseline & $b_1$ prompt & $b_2$ SFT-agn. & $b_3$ SFT-aware & $b_4$ RL \\
+    \midrule
+    Black-box \recallfpr      & 0.13 & 0.20 & 0.00 & 0.00 & 0.27 \\
+    White-box \recallfpr      & 0.53 & 0.27 & 0.20 & 0.53 & 0.40 \\
+    CoT-control \recallfpr    & 0.53 & 0.27 & 0.20 & 0.07 & 0.67 \\
+    \midrule
+    White-box $\deltadet(b)$  & --- & 0.27 & \textbf{0.33} & 0.00 & 0.13 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Where the gap opens.}
+Table~\ref{tab:main} and Figure~\ref{fig:results} summarise the primary
+finding. The white-box probe starts at recall $0.53$ at baseline---well
+above the surface monitor ($0.13$) and matched to the CoT control
+($0.53$). The largest probe gap is at the probe-\emph{agnostic} SFT rung:
+$\deltadet(b_2)=0.33$ (recall $0.53\rightarrow 0.20$; bootstrap $95\%$ CI
+$[0.00,\,0.67]$). Prompt-only pressure already opens a gap
+($\deltadet(b_1)=0.27$). Critically, probe-aware SFT does \emph{not}
+further collapse the probe on this objective ($\deltadet(b_3)=0.00$;
+recall returns to $0.53$), and RL yields only
+$\deltadet(b_4)=0.13$. The $b_2$--$b_3$ contrast therefore cuts against a
+simple ``adaptive collapse'' narrative for this model and loss: cleaning
+surface style transfers more than the softplus probe penalty we used.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/results_cross_monitor.pdf}
+  \caption{\textbf{Cross-monitor comparison.}
+  \textbf{(A)} Recall heatmap (monitor $\times$ budget) makes the
+  ordering visible at a glance.
+  \textbf{(B)} $\deltadet$ by monitor family; negative values mean recall
+  \emph{increased} relative to baseline.
+  \textbf{(C)} Outcome plane: each rung is a point in
+  $(\deltadet_{\mathrm{surface}},\,\deltadet_{\mathrm{probe}})$; the
+  dashed path traces the budget ladder. The ``both brittle'' region is
+  high gap on both axes.}
+  \label{fig:results-cross}
+\end{figure}
+
+\paragraph{Cross-monitor pattern.}
+Figure~\ref{fig:results-cross} breaks the same run out by monitor family.
+The surface monitor is weak at baseline and collapses to zero recall under
+$b_2$/$b_3$, then partially recovers under $b_4$ (recall $0.27$). The CoT
+control tracks the probe through $b_1$/$b_2$, drops sharply at $b_3$
+(recall $0.07$), then \emph{rises} above baseline at $b_4$ (recall $0.67$).
+Because our ladder never optimises against the CoT reader, that recovery
+should not be read as intrinsic CoT robustness~\citep{baker2025monitoring}.
+On the outcome plane, $b_2$ sits farthest toward probe brittleness while
+$b_3$ returns near the probe origin---the same $b_2$ vs.\ $b_3$ contrast as
+Figure~\ref{fig:results}, now visible against the surface axis.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/results_diagnostics.pdf}
+  \caption{\textbf{Confound diagnostics.}
+  \textbf{(A)} Broken-agent TOST gate: deception-success proxy at baseline
+  vs.\ each adversary rung; all rungs pass the $\ge 80\%$ retention margin.
+  \textbf{(B)} Surface threshold drift and FPR evaluated at the fixed
+  $b_0$ threshold on adversarial benign controls.
+  \textbf{(C)} Stepwise probe-recall path with per-rung deltas
+  (signed change from the previous rung).}
+  \label{fig:results-diag}
+\end{figure}
+
+\paragraph{Broken-agent gate and threshold drift.}
+Figure~\ref{fig:results-diag} checks the two confounds that can fake a
+robustness gap. All reported rungs pass the TOST retention gate under our
+proxy (deception-success remains comparable to baseline), so we treat the
+detection drops as concealment rather than a broken agent---with the caveat
+that the proxy is coarse (Section~\ref{sec:discussion}). Threshold drift on
+the surface monitor is non-zero but does not reverse the primary probe
+story; panel~C restates the probe path as successive signed steps.
+
+\paragraph{Label noise.}
+Rule-label agreement with the intended deception class at baseline is
+$0.70$, so some sessions are imperfectly labelled by the scenario
+heuristic. We report this explicitly rather than silently averaging it away.
+
+% =====================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{What the gap means for monitoring.}
+The value of a deception monitor is not its accuracy against a cooperative
+model but its accuracy against a model with an incentive to evade. Reading
+the robustness gap as a curve reframes deployment from ``is the probe
+accurate?'' to ``how much adversary effort does a given level of protection
+cost?'' In our run, that cost is paid earliest by surface-style SFT ($b_2$),
+not by the probe-aware objective we implemented ($b_3$).
+
+\paragraph{What a gap means for a control protocol.}
+In the AI-control framing~\citep{greenblatt2023aicontrol}, a monitor is a
+budgeted auditor. A gap translates into control-relevant quantities: the
+expected number of undetected deceptive episodes before the first catch,
+and time-to-first-detection---both degrade with $1-\recallfpr$. Under
+$b_2$, the probe's miss rate roughly doubles relative to baseline.
+
+\paragraph{Why $b_3$ did not collapse the probe.}
+On this run the probe-aware SFT objective did not open an additional gap
+beyond $b_2$. Compatible explanations include a weak $\lambda$ relative to
+the behavioural CE term, and a training-time probe adapter that did not
+faithfully match the evaluation probe (RL logs reported near-zero probe
+scores). We therefore treat $\deltadet(b_3)$ and $\deltadet(b_4)$ as
+\emph{preliminary} under the present attack implementation, not as a
+certified claim that probe-aware training fails to evade.
+
+\paragraph{Limitations.}
+Results are for a single open-weights dense model (\model{}), one
+fine-tuning seed, and $N{=}60$ sessions ($30$ test). Bootstrap CIs are
+wide. The broken-agent proxy is coarse. Scenario rule-label agreement at
+baseline is $0.70$. Stronger adaptive results---with the evaluation probe
+wired exactly into $b_3$/$b_4$ training and verified non-degenerate probe
+scores---are pending; the numbers reported here should not be read as the
+final adaptive stress test.
+
+\paragraph{Scope and future work.}
+Pending work: match the training probe to the evaluation probe, increase
+$\lambda$ and attack steps, then re-measure $b_3$/$b_4$. Further
+extensions include CoT-aware rungs, defender-side probe rotation/transfer,
+multiple fine-tuning seeds, and a second model family.
+
+% =====================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+Deception monitors for AI agents are increasingly proposed as load-bearing
+safety controls, yet their headline numbers are measured against agents
+that are not trying to escape them. By analogy to adversarial robustness,
+the right quantity is the robustness gap $\deltadet(\budget)$: how much
+detection recall a monitor loses as adversary budget rises, with a
+probe-aware rung as a decisive adaptive test. We defined the protocol,
+separated probe-agnostic from probe-aware adversaries, gated broken-agent
+confounds, and ran $b_1$--$b_4$ on \model{} under Modal H200. On this run
+the largest probe gap opened under probe-\emph{agnostic} SFT
+($\deltadet(b_2)=0.33$), not under probe-aware SFT
+($\deltadet(b_3)=0.00$)---evidence that the measurement protocol matters as
+much as any single robustness number, and that adaptive objectives must be
+stress-tested rather than assumed.
+
+% =====================================================================
+\section*{Broader Impact}
+\label{sec:impact}
+
+This work studies whether deception monitors can be trusted, and to do so
+it builds agents optimised to evade them. We regard those adversarial
+variants as a \emph{measurement instrument, not a deployment recipe}. We
+(i)~describe training at reproduction level while gating public release of
+evasive checkpoints; (ii)~use open-weights models so defensive findings are
+reproducible by the safety community; (iii)~frame the contribution as
+diagnostic for monitor designers; and (iv)~disclose the evasion recipe to
+authors of the probe we stress-test ahead of public release when
+applicable. On balance, publishing a rigorous measure of monitor fragility
+does more to improve oversight than withholding it, provided evasive
+artifacts are handled with care.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
