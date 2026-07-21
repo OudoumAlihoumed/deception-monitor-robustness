@@ -10,21 +10,15 @@
 > **Research question.** Not *how accurate is a deception monitor?* — but  
 > **how much does its accuracy degrade as a function of adversary effort?**
 
-This repository implements a **robustness-gap protocol** for deception monitors on AI agents: a black-box surface classifier, a white-box residual-stream probe, and a chain-of-thought control, evaluated against an ordered adversary-budget ladder \(b_1\!\rightarrow\!b_4\).
+This repository is the **code** for a robustness-gap protocol on deception monitors for AI agents: a black-box surface classifier, a white-box residual-stream probe, and a chain-of-thought control, evaluated against an ordered adversary-budget ladder \(b_1\!\rightarrow\!b_4\).
 
-**Author:** [Oudoum Ali Houmed](https://github.com/OudoumAlihoumed) · Université Paris-Saclay  
-**Paper draft:** [`paper/main.tex`](paper/main.tex) · Midpoint check-in: [`paper/midpoint_checkin.tex`](paper/midpoint_checkin.tex)
+**Author:** [Oudoum Ali Houmed](https://github.com/OudoumAlihoumed) · Université Paris-Saclay
 
 ---
 
 ## Why this exists
 
 Linear probes on residual-stream activations report high held-out recall for strategic deception — but those numbers are usually measured against agents that are **not trying to evade the monitor**. Drawing on adversarial-robustness methodology ([Athalye et al., 2018](https://arxiv.org/abs/1802.00420); [Tramèr et al., 2020](https://arxiv.org/abs/2002.08347)) and the dual of [Sleeper Agents](https://arxiv.org/abs/2401.05566) (does *detection* persist under training aimed at evasion?), this project reports a **budget curve**, not a single accuracy number.
-
-<p align="center">
-  <img src="paper/figures/scenario_figure1.png" width="92%" alt="What we measure: agentic deception under monitoring" />
-</p>
-<p align="center"><em>Figure — What we measure: agentic deception under monitoring (definition / labelling contract).</em></p>
 
 ---
 
@@ -62,11 +56,6 @@ Linear probes on residual-stream activations report high held-out recall for str
 
 **Key contrast:** \(b_2\) vs \(b_3\) — transfer under surface pressure vs adaptive targeting.
 
-<p align="center">
-  <img src="paper/figures/methodology_figure1.png" width="92%" alt="Measurement protocol pipeline" />
-</p>
-<p align="center"><em>Figure — End-to-end measurement protocol (Steps 1–11).</em></p>
-
 ---
 
 ## Repository layout
@@ -85,12 +74,7 @@ deception-monitor-robustness/
 ├── scripts/
 │   ├── run_pipeline_validation.py       # CPU synthetic validation
 │   ├── modal_app.py                     # full GPU ladder on Modal
-│   └── generate_figures.py              # paper figures
-├── paper/
-│   ├── main.tex                         # workshop / arXiv draft
-│   ├── midpoint_checkin.tex             # fellowship midpoint
-│   ├── references.bib
-│   └── figures/                         # PDF + PNG
+│   └── generate_figures.py              # optional figure generation
 ├── results/                             # JSON outputs (see honesty note)
 ├── requirements.txt
 └── LICENSE
@@ -141,11 +125,10 @@ modal run scripts/modal_app.py --n-sessions 60 --sft-steps 200
 Results land in `results/modal_experiment_results.json`.  
 **Never commit API tokens or `.env` files.**
 
-### 3 · Figures
+### 3 · Optional figures
 
 ```bash
 python scripts/generate_figures.py
-# → paper/figures/*.pdf and *.png
 ```
 
 ---
@@ -154,23 +137,13 @@ python scripts/generate_figures.py
 
 | Component | Status |
 |-----------|--------|
-| Literature / related-work positioning | Done |
-| Formal deception definition + scenario figure | Done |
-| Full measurement protocol + methodology figure | Done |
-| Paper framing (`paper/main.tex`) | Draft |
+| Scenario / monitor / budget-ladder code | Done |
+| Evaluation stack (\(\Delta\mathrm{det}\), bootstrap, TOST gate) | Done |
+| Modal GPU pipeline | Done (preliminary) |
 | Faithful probe-aware adaptive attack (\(b_3\)/\(b_4\)) | **Pending** (training probe must match eval probe) |
 | Adaptive defender (retrain / transfer) | Specified; not claimed as finished measurement |
 
-Preliminary Modal numbers exist; **adaptive rungs are not yet treated as conclusive** until the probe-aware wiring is verified. See the Limitations discussion in `paper/main.tex`.
-
----
-
-## Illustrative results panels
-
-<p align="center">
-  <img src="paper/figures/results_main.png" width="90%" alt="Primary recall and Δdet curves" />
-</p>
-<p align="center"><em>Primary result panels — recall across budget and probe \(\Delta\mathrm{det}(b)\).</em></p>
+Preliminary Modal numbers exist; **adaptive rungs are not yet treated as conclusive** until the probe-aware wiring is verified.
 
 ---
 
@@ -185,11 +158,11 @@ If you use this code or protocol, please cite:
   author       = {Houmed, Oudoum A.},
   year         = {2026},
   howpublished = {\url{https://github.com/OudoumAlihoumed/deception-monitor-robustness}},
-  note         = {Research code and draft paper}
+  note         = {Research code}
 }
 ```
 
-Draft LaTeX: [`paper/main.tex`](paper/main.tex). Key priors: [Goldowsky-Dill et al., 2025](https://arxiv.org/abs/2502.03407), [Bailey et al., 2024](https://arxiv.org/abs/2412.09565), [Hubinger et al., 2024](https://arxiv.org/abs/2401.05566), [Greenblatt et al., 2023](https://arxiv.org/abs/2312.06942).
+Key priors: [Goldowsky-Dill et al., 2025](https://arxiv.org/abs/2502.03407), [Bailey et al., 2024](https://arxiv.org/abs/2412.09565), [Hubinger et al., 2024](https://arxiv.org/abs/2401.05566), [Greenblatt et al., 2023](https://arxiv.org/abs/2312.06942).
 
 ---
 
