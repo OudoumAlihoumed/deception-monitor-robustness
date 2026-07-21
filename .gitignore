@@ -1,0 +1,53 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.joblib
+
+# Secrets / local env
+.env
+.env.*
+!.env.example
+HF_TOKEN
+*.pem
+secrets/
+
+# Model weights / large artifacts
+*.pt
+*.bin
+*.safetensors
+*.gguf
+results/activations/
+results/checkpoints/
+results/*.ckpt
+
+# Logs (keep JSON results)
+results/*.log
+*.log
+
+# OS / editor
+.DS_Store
+.mplconfig/
+.idea/
+.vscode/
+*.swp
+
+# LaTeX build junk (keep .tex, .bib, .sty, figures, committed PDF draft optional)
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+
+# Notebook checkpoints
+.ipynb_checkpoints/

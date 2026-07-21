@@ -1,0 +1,1 @@
+"""Agentic deception scenario templates."""
