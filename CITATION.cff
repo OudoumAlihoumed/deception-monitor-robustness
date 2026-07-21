@@ -12,7 +12,7 @@ license: MIT
 version: 0.1.0
 date-released: "2026-07-21"
 abstract: >-
-  Protocol and code for measuring the robustness gap of deception monitors
+  Research code for measuring the robustness gap of deception monitors
   (surface, linear probe, CoT control) under an adaptive adversary-budget ladder.
 keywords:
   - AI safety
