@@ -38,8 +38,16 @@ results/*.log
 .vscode/
 *.swp
 
-# Paper / LaTeX (kept locally; not published on GitHub)
-paper/
+# LaTeX build junk (keep paper PDFs / sources trackable if desired)
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
 
 # Notebook checkpoints
 .ipynb_checkpoints/
