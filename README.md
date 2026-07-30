@@ -25,7 +25,8 @@ If GitHub shows empty folders with only `.gitkeep`, that is normal — those are
 |------|------|
 | **Paper PDF** | [`paper/main.pdf`](paper/main.pdf) |
 | **Full map** | [`docs/OVERVIEW.md`](docs/OVERVIEW.md) |
-| **Methodology** | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) |
+| **Methodology (pipeline)** | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) |
+| **Math of \(b_0\)–\(b_4\)** | [`docs/MATH_LADDER.md`](docs/MATH_LADDER.md) |
 
 ```bash
 open paper/main.pdf          # macOS Preview
@@ -67,13 +68,22 @@ Reported **only** on rungs that pass the TOST retention gate (≥ 80% of baselin
 | **b₀** | Baseline | No intervention | — |
 | **b₁** | Prompt | Concealment instruction; no weight update | No |
 | **b₂** | SFT probe-agnostic | Deceptive SFT; probe **out** of loop | No (transfer) |
-| **b₃** | SFT probe-aware | CE + λ · softplus(probe score) | **Yes** |
-| **b₄** | RL probe-aware | Online reward: deceive ∧ evade | **Yes** |
+| **b₃** | SFT probe-aware | \(\mathcal{L}=\mathrm{CE}+\lambda\,\mathrm{softplus}(D)\) | **Yes** |
+| **b₄** | RL probe-aware | \(R=\alpha\cdot\mathrm{dec}-\lambda\cdot D-\beta\cdot\mathrm{surf}\) | **Yes** |
 
 **Key contrast:** **b₂ vs b₃** — surface-only pressure vs probe-in-the-loss pressure.
 
 <p align="center">
-  <img src="figures/methodology_figure1.png" width="92%" alt="Measurement protocol pipeline" />
+  <img src="figures/methodology_figure1.png" width="96%" alt="Methodology: build episodes, raise adversary budget b0–b4, measure gap only if retention passes" />
+</p>
+
+<p align="center">
+  <em><strong>Methodology (3 stages).</strong>
+  (1) Build episodes from 7 families; score with surface / Apollo probe (L22) / CoT; report AUROC.
+  (2) Raise budget \(b_0\to b_4\) (hatched rungs put the probe in the training objective).
+  (3) Form \(\Delta\mathrm{det}(b)=\mathrm{AUROC}(0)-\mathrm{AUROC}(b)\) only if retention \(\ge 80\%\) (TOST).
+  \(b_2,b_3\) pass and the probe holds; \(b_4\) lowers detection only as deception collapses (retention 0.14) — gap withheld.
+  Full math for every rung: <a href="docs/MATH_LADDER.md"><code>docs/MATH_LADDER.md</code></a>.</em>
 </p>
 
 ---
@@ -88,17 +98,20 @@ deception-monitor-robustness/
 │   ├── monitors/                # surface / Apollo probe / CoT
 │   ├── adversary/budget_ladder.py   # b0–b4 (real ladder)
 │   ├── eval/                    # Δdet, retention, adaptive gates
+│   ├── pipeline/                # residual extract, LoRA, metrics
 │   └── stats/bootstrap.py
 ├── scripts/
 │   ├── modal_app.py             # Modal H200 GPU ladder
 │   ├── generate_figures.py
 │   └── aggregate_cells.py
-├── paper/                       # main.tex + main.pdf (local review)
-├── figures/                     # PNG copies for README
-├── docs/OVERVIEW.md             # laptop map (start here)
+├── paper/                       # main.tex, main.pdf, poster.tex
+├── figures/                     # PNG copies for README (incl. methodology)
+├── docs/
+│   ├── OVERVIEW.md              # laptop map
+│   ├── METHODOLOGY.md           # full pipeline notes
+│   └── MATH_LADDER.md           # deep math: b0–b4 step by step
 ├── results/                     # JSON / pooled summaries
-├── tests/                       # unit tests (local; may lag on GitHub)
-├── notebooks/                   # placeholder (.gitkeep) — empty for now
+├── tests/
 └── requirements.txt
 ```
 
