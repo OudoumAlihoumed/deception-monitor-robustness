@@ -135,10 +135,14 @@ def bootstrap_recall_delta(
     n_bootstrap: int = 2000,
     confidence_level: float = 0.95,
     seed: int = 0,
+    *,
+    threshold: float | None = None,
 ) -> BootstrapResult:
     """
     Bootstrap Δdet = recall@fpr(b0) - recall@fpr(b) with session clustering.
-    Thresholds are recomputed within each bootstrap replicate on negatives.
+
+    If ``threshold`` is set (Apollo chat calib), keep it fixed across replicates.
+    Otherwise recompute the FPR quantile on bootstrap negatives (legacy).
     """
     from src.monitors.surface import _recall_at_fpr
 
@@ -149,8 +153,17 @@ def bootstrap_recall_delta(
     rng = np.random.default_rng(seed)
 
     def _delta(idx: np.ndarray) -> float:
-        r0 = _recall_at_fpr(scores_b0[idx], labels[idx], fpr_target)["recall"]
-        rb = _recall_at_fpr(scores_b[idx], labels[idx], fpr_target)["recall"]
+        if threshold is not None:
+            r0 = _recall_at_fpr(
+                scores_b0[idx], labels[idx], fpr_target, threshold=threshold
+            )["recall"]
+            rb = _recall_at_fpr(
+                scores_b[idx], labels[idx], fpr_target, threshold=threshold
+            )["recall"]
+        else:
+            # Legacy: recompute FPR quantile independently per rung/replicate
+            r0 = _recall_at_fpr(scores_b0[idx], labels[idx], fpr_target)["recall"]
+            rb = _recall_at_fpr(scores_b[idx], labels[idx], fpr_target)["recall"]
         return float(r0 - rb)
 
     all_idx = np.arange(len(labels))
@@ -167,6 +180,54 @@ def bootstrap_recall_delta(
         ci_high=float(hi),
         std=float(np.std(stats, ddof=1)),
         n_bootstrap=n_bootstrap,
+        confidence_level=confidence_level,
+    )
+
+
+def bootstrap_auroc(
+    scores: np.ndarray,
+    labels: np.ndarray,
+    session_ids: Sequence,
+    n_bootstrap: int = 2000,
+    confidence_level: float = 0.95,
+    seed: int = 0,
+) -> BootstrapResult:
+    """Session-clustered bootstrap CI for Mann–Whitney AUROC."""
+    from src.eval.apollo_stage2 import mann_whitney_auroc
+
+    scores = np.asarray(scores, dtype=np.float64)
+    labels = np.asarray(labels, dtype=np.int64)
+    session_ids = np.asarray(session_ids)
+    if not (len(scores) == len(labels) == len(session_ids)):
+        raise ValueError("scores, labels, session_ids length mismatch")
+    estimate = float(mann_whitney_auroc(scores, labels))
+    rng = np.random.default_rng(seed)
+    stats = np.empty(n_bootstrap, dtype=np.float64)
+    for i in range(n_bootstrap):
+        idx = session_clustered_indices(session_ids, rng)
+        yb = labels[idx]
+        if yb.min() == yb.max():
+            stats[i] = float("nan")
+            continue
+        stats[i] = float(mann_whitney_auroc(scores[idx], yb))
+    finite = stats[np.isfinite(stats)]
+    if len(finite) < max(10, n_bootstrap // 10):
+        return BootstrapResult(
+            estimate=estimate,
+            ci_low=float("nan"),
+            ci_high=float("nan"),
+            std=float("nan"),
+            n_bootstrap=n_bootstrap,
+            confidence_level=confidence_level,
+        )
+    alpha = 1.0 - confidence_level
+    lo, hi = np.quantile(finite, [alpha / 2, 1.0 - alpha / 2])
+    return BootstrapResult(
+        estimate=estimate,
+        ci_low=float(lo),
+        ci_high=float(hi),
+        std=float(np.std(finite, ddof=1)),
+        n_bootstrap=int(len(finite)),
         confidence_level=confidence_level,
     )
 

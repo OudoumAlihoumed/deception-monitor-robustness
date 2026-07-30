@@ -8,7 +8,7 @@ Budget metrics tracked: gradient steps, tokens, LoRA parameter count.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 import numpy as np
 
@@ -102,6 +102,39 @@ _SURFACE_SUPPRESSION_TARGETS = [
 ]
 
 
+def build_b2_sft_trajectories(
+    records: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    b₂ supervision: successful *baseline* deceptions under the concealment prompt.
+
+    Train on ``response_b0`` (guaranteed deceptive when ``rule_label_b0==1``) with
+    ``system_b1`` (prompt-injection / surface-suppression framing).
+
+    Do **not** supervise ``response_b1``: at b₁ many frozen episodes already stop
+    deceiving, so imitating b₁ teaches honesty and collapses retention (smoke
+    2026-07-25: frozen rule+ 1.00→0.52→0.34 across b0→b1→b2).
+    """
+    out: list[dict[str, Any]] = []
+    for r in records:
+        if int(r.get("rule_label_b0", 0)) != 1:
+            continue
+        assistant = r.get("response_b0") or ""
+        if not str(assistant).strip():
+            continue
+        out.append(
+            {
+                "system": r.get("system_b1") or r.get("system") or "",
+                "user": "\n".join(r.get("user_turns") or []),
+                "assistant": assistant,
+                "hedge_rate": 0.0,
+                "session_id": r.get("session_id"),
+                "source": "response_b0_under_system_b1",
+            }
+        )
+    return out
+
+
 def curate_b2_trajectories(
     raw_trajectories: Sequence[dict[str, Any]],
     max_hedge_rate: float = 0.01,
@@ -111,6 +144,9 @@ def curate_b2_trajectories(
 
     Each trajectory dict expects keys: system, user, assistant, optional hedge_rate.
     Probe scores are NOT used (SFT-agnostic).
+
+    Caller should pass ``build_b2_sft_trajectories`` output (b0 successes under
+    system_b1) — not raw b1 assistants.
     """
     curated: list[dict[str, str]] = []
     for traj in raw_trajectories:
@@ -434,8 +470,8 @@ class BudgetLadder:
         lora_rank: int = 16,
         ft_seeds: Optional[Sequence[int]] = None,
         lambda_probe: float = 0.5,
-        hidden_size: int = 5120,
-        n_layers: int = 64,
+        hidden_size: int = 8192,
+        n_layers: int = 80,
         rl_steps: int = 100,
     ):
         self.lora_rank = lora_rank

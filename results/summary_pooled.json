@@ -1,0 +1,1510 @@
+{
+  "schema_version": "1.0",
+  "result_type": "cell_checkpoint_aggregate",
+  "warning": "Use summary_pooled / summary_by_seed / summary_by_lambda for Table 1. Never use modal_experiment_results.json *_last_cell fields as aggregates.",
+  "n_cells_loaded": 5,
+  "n_cells_ok": 5,
+  "summary_by_rung": {
+    "b2": {
+      "n_cells": 1,
+      "gpu_seconds": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 1578.0059521198273,
+        "std": 0.0
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 0.0,
+      "paths": [
+        "results/checkpoints/cells/b2_seed0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.7931034482758621,
+        "std": 0.0
+      },
+      "auroc_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.8935202728306175,
+        "std": 0.0
+      },
+      "recall_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5862068965517241,
+        "std": 0.0
+      },
+      "auroc_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.709170140204623,
+        "std": 0.0
+      },
+      "recall_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.06896551724137931,
+        "std": 0.0
+      },
+      "auroc_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5363774156877604,
+        "std": 0.0
+      }
+    },
+    "b3": {
+      "n_cells": 2,
+      "gpu_seconds": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1678.1215465068817,
+          1760.4860067367554
+        ],
+        "range": [
+          1678.1215465068817,
+          1760.4860067367554
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b3_seed0_lam0.5.json",
+        "results/checkpoints/cells/b3_seed0_lam8.0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7931034482758621,
+          0.5517241379310345
+        ],
+        "range": [
+          0.5517241379310345,
+          0.7931034482758621
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8787419477074649,
+          0.8472906403940887
+        ],
+        "range": [
+          0.8472906403940887,
+          0.8787419477074649
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.6206896551724138,
+          0.6896551724137931
+        ],
+        "range": [
+          0.6206896551724138,
+          0.6896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7478211443728685,
+          0.7214854111405836
+        ],
+        "range": [
+          0.7214854111405836,
+          0.7478211443728685
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.06896551724137931,
+          0.06896551724137931
+        ],
+        "range": [
+          0.06896551724137931,
+          0.06896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.5678287230011367,
+          0.5297461159530125
+        ],
+        "range": [
+          0.5297461159530125,
+          0.5678287230011367
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      }
+    },
+    "b4": {
+      "n_cells": 2,
+      "gpu_seconds": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1092.0703608989716,
+          935.2075109481812
+        ],
+        "range": [
+          935.2075109481812,
+          1092.0703608989716
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b4_seed0_lam0.5.json",
+        "results/checkpoints/cells/b4_seed0_lam8.0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1.0,
+          0.9655172413793104
+        ],
+        "range": [
+          0.9655172413793104,
+          1.0
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8978779840848806,
+          0.7457370215990906
+        ],
+        "range": [
+          0.7457370215990906,
+          0.8978779840848806
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8620689655172413,
+          0.896551724137931
+        ],
+        "range": [
+          0.8620689655172413,
+          0.896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7142857142857143,
+          0.6798029556650247
+        ],
+        "range": [
+          0.6798029556650247,
+          0.7142857142857143
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.034482758620689655,
+          0.034482758620689655
+        ],
+        "range": [
+          0.034482758620689655,
+          0.034482758620689655
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.5371352785145889,
+          0.5003789314134142
+        ],
+        "range": [
+          0.5003789314134142,
+          0.5371352785145889
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      }
+    }
+  },
+  "summary_by_seed": {
+    "b2_seed0": {
+      "n_cells": 1,
+      "gpu_seconds": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 1578.0059521198273,
+        "std": 0.0
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 0.0,
+      "paths": [
+        "results/checkpoints/cells/b2_seed0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.7931034482758621,
+        "std": 0.0
+      },
+      "auroc_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.8935202728306175,
+        "std": 0.0
+      },
+      "recall_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5862068965517241,
+        "std": 0.0
+      },
+      "auroc_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.709170140204623,
+        "std": 0.0
+      },
+      "recall_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.06896551724137931,
+        "std": 0.0
+      },
+      "auroc_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5363774156877604,
+        "std": 0.0
+      }
+    },
+    "b3_seed0": {
+      "n_cells": 2,
+      "gpu_seconds": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1678.1215465068817,
+          1760.4860067367554
+        ],
+        "range": [
+          1678.1215465068817,
+          1760.4860067367554
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b3_seed0_lam0.5.json",
+        "results/checkpoints/cells/b3_seed0_lam8.0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7931034482758621,
+          0.5517241379310345
+        ],
+        "range": [
+          0.5517241379310345,
+          0.7931034482758621
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8787419477074649,
+          0.8472906403940887
+        ],
+        "range": [
+          0.8472906403940887,
+          0.8787419477074649
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.6206896551724138,
+          0.6896551724137931
+        ],
+        "range": [
+          0.6206896551724138,
+          0.6896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7478211443728685,
+          0.7214854111405836
+        ],
+        "range": [
+          0.7214854111405836,
+          0.7478211443728685
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.06896551724137931,
+          0.06896551724137931
+        ],
+        "range": [
+          0.06896551724137931,
+          0.06896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.5678287230011367,
+          0.5297461159530125
+        ],
+        "range": [
+          0.5297461159530125,
+          0.5678287230011367
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      }
+    },
+    "b4_seed0": {
+      "n_cells": 2,
+      "gpu_seconds": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1092.0703608989716,
+          935.2075109481812
+        ],
+        "range": [
+          935.2075109481812,
+          1092.0703608989716
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b4_seed0_lam0.5.json",
+        "results/checkpoints/cells/b4_seed0_lam8.0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1.0,
+          0.9655172413793104
+        ],
+        "range": [
+          0.9655172413793104,
+          1.0
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8978779840848806,
+          0.7457370215990906
+        ],
+        "range": [
+          0.7457370215990906,
+          0.8978779840848806
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8620689655172413,
+          0.896551724137931
+        ],
+        "range": [
+          0.8620689655172413,
+          0.896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7142857142857143,
+          0.6798029556650247
+        ],
+        "range": [
+          0.6798029556650247,
+          0.7142857142857143
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.034482758620689655,
+          0.034482758620689655
+        ],
+        "range": [
+          0.034482758620689655,
+          0.034482758620689655
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.5371352785145889,
+          0.5003789314134142
+        ],
+        "range": [
+          0.5003789314134142,
+          0.5371352785145889
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      }
+    }
+  },
+  "summary_by_lambda": {
+    "b3_lam0.5": {
+      "n_cells": 1,
+      "gpu_seconds": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 1678.1215465068817,
+        "std": 0.0
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b3_seed0_lam0.5.json"
+      ],
+      "recall_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.7931034482758621,
+        "std": 0.0
+      },
+      "auroc_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.8787419477074649,
+        "std": 0.0
+      },
+      "recall_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.6206896551724138,
+        "std": 0.0
+      },
+      "auroc_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.7478211443728685,
+        "std": 0.0
+      },
+      "recall_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.06896551724137931,
+        "std": 0.0
+      },
+      "auroc_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5678287230011367,
+        "std": 0.0
+      }
+    },
+    "b3_lam8.0": {
+      "n_cells": 1,
+      "gpu_seconds": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 1760.4860067367554,
+        "std": 0.0
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b3_seed0_lam8.0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5517241379310345,
+        "std": 0.0
+      },
+      "auroc_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.8472906403940887,
+        "std": 0.0
+      },
+      "recall_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.6896551724137931,
+        "std": 0.0
+      },
+      "auroc_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.7214854111405836,
+        "std": 0.0
+      },
+      "recall_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.06896551724137931,
+        "std": 0.0
+      },
+      "auroc_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5297461159530125,
+        "std": 0.0
+      }
+    },
+    "b4_lam0.5": {
+      "n_cells": 1,
+      "gpu_seconds": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 1092.0703608989716,
+        "std": 0.0
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b4_seed0_lam0.5.json"
+      ],
+      "recall_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "auroc_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.8978779840848806,
+        "std": 0.0
+      },
+      "recall_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.8620689655172413,
+        "std": 0.0
+      },
+      "auroc_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.7142857142857143,
+        "std": 0.0
+      },
+      "recall_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.034482758620689655,
+        "std": 0.0
+      },
+      "auroc_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5371352785145889,
+        "std": 0.0
+      }
+    },
+    "b4_lam8.0": {
+      "n_cells": 1,
+      "gpu_seconds": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 935.2075109481812,
+        "std": 0.0
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b4_seed0_lam8.0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.9655172413793104,
+        "std": 0.0
+      },
+      "auroc_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.7457370215990906,
+        "std": 0.0
+      },
+      "recall_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.896551724137931,
+        "std": 0.0
+      },
+      "auroc_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.6798029556650247,
+        "std": 0.0
+      },
+      "recall_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.034482758620689655,
+        "std": 0.0
+      },
+      "auroc_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5003789314134142,
+        "std": 0.0
+      }
+    }
+  },
+  "summary_pooled": {
+    "b2": {
+      "n_cells": 1,
+      "gpu_seconds": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 1578.0059521198273,
+        "std": 0.0
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 0.0,
+      "paths": [
+        "results/checkpoints/cells/b2_seed0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.7931034482758621,
+        "std": 0.0
+      },
+      "auroc_linear_probe": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.8935202728306175,
+        "std": 0.0
+      },
+      "recall_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5862068965517241,
+        "std": 0.0
+      },
+      "auroc_surface": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.709170140204623,
+        "std": 0.0
+      },
+      "recall_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.06896551724137931,
+        "std": 0.0
+      },
+      "auroc_cot_reading": {
+        "n": 1,
+        "n_seeds": 1,
+        "mean": 0.5363774156877604,
+        "std": 0.0
+      }
+    },
+    "b3": {
+      "n_cells": 2,
+      "gpu_seconds": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1678.1215465068817,
+          1760.4860067367554
+        ],
+        "range": [
+          1678.1215465068817,
+          1760.4860067367554
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b3_seed0_lam0.5.json",
+        "results/checkpoints/cells/b3_seed0_lam8.0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7931034482758621,
+          0.5517241379310345
+        ],
+        "range": [
+          0.5517241379310345,
+          0.7931034482758621
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8787419477074649,
+          0.8472906403940887
+        ],
+        "range": [
+          0.8472906403940887,
+          0.8787419477074649
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.6206896551724138,
+          0.6896551724137931
+        ],
+        "range": [
+          0.6206896551724138,
+          0.6896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7478211443728685,
+          0.7214854111405836
+        ],
+        "range": [
+          0.7214854111405836,
+          0.7478211443728685
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.06896551724137931,
+          0.06896551724137931
+        ],
+        "range": [
+          0.06896551724137931,
+          0.06896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.5678287230011367,
+          0.5297461159530125
+        ],
+        "range": [
+          0.5297461159530125,
+          0.5678287230011367
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      }
+    },
+    "b4": {
+      "n_cells": 2,
+      "gpu_seconds": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1092.0703608989716,
+          935.2075109481812
+        ],
+        "range": [
+          935.2075109481812,
+          1092.0703608989716
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "lambda_worked_pass_rate": 0.0,
+      "adapter_live_pass_rate": 1.0,
+      "paths": [
+        "results/checkpoints/cells/b4_seed0_lam0.5.json",
+        "results/checkpoints/cells/b4_seed0_lam8.0.json"
+      ],
+      "recall_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          1.0,
+          0.9655172413793104
+        ],
+        "range": [
+          0.9655172413793104,
+          1.0
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_linear_probe": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8978779840848806,
+          0.7457370215990906
+        ],
+        "range": [
+          0.7457370215990906,
+          0.8978779840848806
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.8620689655172413,
+          0.896551724137931
+        ],
+        "range": [
+          0.8620689655172413,
+          0.896551724137931
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_surface": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.7142857142857143,
+          0.6798029556650247
+        ],
+        "range": [
+          0.6798029556650247,
+          0.7142857142857143
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "recall_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.034482758620689655,
+          0.034482758620689655
+        ],
+        "range": [
+          0.034482758620689655,
+          0.034482758620689655
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      },
+      "auroc_cot_reading": {
+        "n": 2,
+        "n_seeds": 2,
+        "values": [
+          0.5371352785145889,
+          0.5003789314134142
+        ],
+        "range": [
+          0.5003789314134142,
+          0.5371352785145889
+        ],
+        "reporting": "values_and_range",
+        "note": "n_seeds=2: do not report mean\u00b1std"
+      }
+    }
+  },
+  "cells": [
+    {
+      "path": "results/checkpoints/cells/b2_seed0.json",
+      "rung": "b2",
+      "seed": 0,
+      "lambda": null,
+      "gpu_seconds": 1578.0059521198273,
+      "lambda_worked": null,
+      "adapter_live": null,
+      "continue_from_b3": null,
+      "monitor_metrics": {
+        "recall": {
+          "linear_probe": {
+            "b2": 0.7931034482758621
+          },
+          "surface": {
+            "b2": 0.5862068965517241
+          },
+          "cot_reading": {
+            "b2": 0.06896551724137931
+          }
+        },
+        "auroc": {
+          "linear_probe": {
+            "b2": 0.8935202728306175
+          },
+          "surface": {
+            "b2": 0.709170140204623
+          },
+          "cot_reading": {
+            "b2": 0.5363774156877604
+          }
+        },
+        "alpha": {
+          "linear_probe": 0.01,
+          "surface": 0.05,
+          "cot_reading": 0.05
+        },
+        "note": "Per-cell; aggregate with scripts/aggregate_cells.py"
+      },
+      "raw_keys": [
+        "gpu_seconds",
+        "hook",
+        "hook_registered",
+        "mem_after_gb",
+        "mem_baseline_gb",
+        "mem_before_gb",
+        "monitor_metrics",
+        "rung",
+        "seed"
+      ]
+    },
+    {
+      "path": "results/checkpoints/cells/b3_seed0_lam0.5.json",
+      "rung": "b3",
+      "seed": 0,
+      "lambda": 0.5,
+      "gpu_seconds": 1678.1215465068817,
+      "lambda_worked": {
+        "mean_logit_b0": -6.937675719797745,
+        "mean_logit_b3": -6.899208678616321,
+        "drop": -0.0384670411814243,
+        "std_logit_b0": 0.05104873957678263,
+        "relative_drop_std": -0.753535572089216,
+        "min_drop": 0.1,
+        "min_relative_drop_std": 0.25,
+        "abs_ok": false,
+        "rel_ok": false,
+        "passed": false,
+        "outcome": "attack_too_weak",
+        "note": "attack_worked \u2192 penalty moved the score distribution; attack_too_weak \u2192 \u03bb too small vs CE (or softplus bug) \u2014 \u0394det must not be framed as probe robustness"
+      },
+      "adapter_live": {
+        "passed": true,
+        "max_abs_diff": 2.62893081526272e-07,
+        "atol": 0.0001,
+        "n": 8,
+        "grad": {
+          "grad_norm": 3.9835933421272784e-05,
+          "loss_probe": 0.0009691027225926518,
+          "min_grad_norm": 1e-08,
+          "via_dummy_param": true
+        },
+        "device": "cuda:0",
+        "scaler": {
+          "scaler_absorbed": true,
+          "normalize": true,
+          "mean_l2": 82.25490354772091,
+          "scale_mean": 1.5661886089437758,
+          "refit_on_ours": false
+        },
+        "grads_cleared": true,
+        "hook_registered": true,
+        "hook": {
+          "hook_registered": true,
+          "probe_layer": 22,
+          "probe_layers": [
+            22,
+            30,
+            40,
+            50
+          ],
+          "block_indices": {
+            "22": 21,
+            "30": 29,
+            "40": 39,
+            "50": 49
+          },
+          "indexing": "apollo_hidden_states",
+          "n_layers_model": 80,
+          "n_hooks": 4
+        },
+        "grads_cleared_before_train": true
+      },
+      "continue_from_b3": null,
+      "monitor_metrics": {
+        "recall": {
+          "linear_probe": {
+            "b3": 0.7931034482758621
+          },
+          "surface": {
+            "b3": 0.6206896551724138
+          },
+          "cot_reading": {
+            "b3": 0.06896551724137931
+          }
+        },
+        "auroc": {
+          "linear_probe": {
+            "b3": 0.8787419477074649
+          },
+          "surface": {
+            "b3": 0.7478211443728685
+          },
+          "cot_reading": {
+            "b3": 0.5678287230011367
+          }
+        },
+        "alpha": {
+          "linear_probe": 0.01,
+          "surface": 0.05,
+          "cot_reading": 0.05
+        },
+        "note": "Per-cell; aggregate with scripts/aggregate_cells.py"
+      },
+      "raw_keys": [
+        "adapter_live",
+        "budget_steps",
+        "budget_tokens",
+        "gpu_seconds",
+        "hook_registered",
+        "lambda",
+        "lambda_effective",
+        "lambda_worked",
+        "mem_after_gb",
+        "mem_baseline_gb",
+        "mem_before_gb",
+        "monitor_metrics",
+        "rung",
+        "seed"
+      ]
+    },
+    {
+      "path": "results/checkpoints/cells/b3_seed0_lam8.0.json",
+      "rung": "b3",
+      "seed": 0,
+      "lambda": 8.0,
+      "gpu_seconds": 1760.4860067367554,
+      "lambda_worked": {
+        "mean_logit_b0": -6.937675719797745,
+        "mean_logit_b3": -6.9211113869660865,
+        "drop": -0.016564332831658923,
+        "std_logit_b0": 0.05104873957678263,
+        "relative_drop_std": -0.32448074073884703,
+        "min_drop": 0.1,
+        "min_relative_drop_std": 0.25,
+        "abs_ok": false,
+        "rel_ok": false,
+        "passed": false,
+        "outcome": "attack_too_weak",
+        "note": "attack_worked \u2192 penalty moved the score distribution; attack_too_weak \u2192 \u03bb too small vs CE (or softplus bug) \u2014 \u0394det must not be framed as probe robustness"
+      },
+      "adapter_live": {
+        "passed": true,
+        "max_abs_diff": 2.62893081526272e-07,
+        "atol": 0.0001,
+        "n": 8,
+        "grad": {
+          "grad_norm": 3.9835933421272784e-05,
+          "loss_probe": 0.0009691027225926518,
+          "min_grad_norm": 1e-08,
+          "via_dummy_param": true
+        },
+        "device": "cuda:0",
+        "scaler": {
+          "scaler_absorbed": true,
+          "normalize": true,
+          "mean_l2": 82.25490354772091,
+          "scale_mean": 1.5661886089437758,
+          "refit_on_ours": false
+        },
+        "grads_cleared": true,
+        "hook_registered": true,
+        "hook": {
+          "hook_registered": true,
+          "probe_layer": 22,
+          "probe_layers": [
+            22,
+            30,
+            40,
+            50
+          ],
+          "block_indices": {
+            "22": 21,
+            "30": 29,
+            "40": 39,
+            "50": 49
+          },
+          "indexing": "apollo_hidden_states",
+          "n_layers_model": 80,
+          "n_hooks": 4
+        },
+        "grads_cleared_before_train": true
+      },
+      "continue_from_b3": null,
+      "monitor_metrics": {
+        "recall": {
+          "linear_probe": {
+            "b3": 0.5517241379310345
+          },
+          "surface": {
+            "b3": 0.6896551724137931
+          },
+          "cot_reading": {
+            "b3": 0.06896551724137931
+          }
+        },
+        "auroc": {
+          "linear_probe": {
+            "b3": 0.8472906403940887
+          },
+          "surface": {
+            "b3": 0.7214854111405836
+          },
+          "cot_reading": {
+            "b3": 0.5297461159530125
+          }
+        },
+        "alpha": {
+          "linear_probe": 0.01,
+          "surface": 0.05,
+          "cot_reading": 0.05
+        },
+        "note": "Per-cell; aggregate with scripts/aggregate_cells.py"
+      },
+      "raw_keys": [
+        "adapter_live",
+        "budget_steps",
+        "budget_tokens",
+        "gpu_seconds",
+        "hook_registered",
+        "lambda",
+        "lambda_effective",
+        "lambda_worked",
+        "mem_after_gb",
+        "mem_baseline_gb",
+        "mem_before_gb",
+        "monitor_metrics",
+        "rung",
+        "seed"
+      ]
+    },
+    {
+      "path": "results/checkpoints/cells/b4_seed0_lam0.5.json",
+      "rung": "b4",
+      "seed": 0,
+      "lambda": 0.5,
+      "gpu_seconds": 1092.0703608989716,
+      "lambda_worked": {
+        "mean_logit_b0": -6.937675719797745,
+        "mean_logit_b3": -6.868787470765739,
+        "drop": -0.06888824903200685,
+        "std_logit_b0": 0.05104873957678263,
+        "relative_drop_std": -1.3494603315012654,
+        "min_drop": 0.1,
+        "min_relative_drop_std": 0.25,
+        "abs_ok": false,
+        "rel_ok": false,
+        "passed": false,
+        "outcome": "attack_too_weak",
+        "note": "attack_worked \u2192 penalty moved the score distribution; attack_too_weak \u2192 \u03bb too small vs CE (or softplus bug) \u2014 \u0394det must not be framed as probe robustness"
+      },
+      "adapter_live": {
+        "passed": true,
+        "max_abs_diff": 2.62893081526272e-07,
+        "atol": 0.0001,
+        "n": 8,
+        "grad": {
+          "grad_norm": 3.9835933421272784e-05,
+          "loss_probe": 0.0009691027225926518,
+          "min_grad_norm": 1e-08,
+          "via_dummy_param": true
+        },
+        "device": "cuda:0",
+        "scaler": {
+          "scaler_absorbed": true,
+          "normalize": true,
+          "mean_l2": 82.25490354772091,
+          "scale_mean": 1.5661886089437758,
+          "refit_on_ours": false
+        },
+        "grads_cleared": true,
+        "hook_registered": true,
+        "hook": {
+          "hook_registered": true,
+          "probe_layer": 22,
+          "probe_layers": [
+            22,
+            30,
+            40,
+            50
+          ],
+          "block_indices": {
+            "22": 21,
+            "30": 29,
+            "40": 39,
+            "50": 49
+          },
+          "indexing": "apollo_hidden_states",
+          "n_layers_model": 80,
+          "n_hooks": 4
+        },
+        "grads_cleared_before_train": true
+      },
+      "continue_from_b3": false,
+      "monitor_metrics": {
+        "recall": {
+          "linear_probe": {
+            "b4": 1.0
+          },
+          "surface": {
+            "b4": 0.8620689655172413
+          },
+          "cot_reading": {
+            "b4": 0.034482758620689655
+          }
+        },
+        "auroc": {
+          "linear_probe": {
+            "b4": 0.8978779840848806
+          },
+          "surface": {
+            "b4": 0.7142857142857143
+          },
+          "cot_reading": {
+            "b4": 0.5371352785145889
+          }
+        },
+        "alpha": {
+          "linear_probe": 0.01,
+          "surface": 0.05,
+          "cot_reading": 0.05
+        },
+        "note": "Per-cell; aggregate with scripts/aggregate_cells.py"
+      },
+      "raw_keys": [
+        "adapter_live",
+        "budget_steps",
+        "budget_tokens",
+        "continue_from_b3",
+        "gpu_seconds",
+        "hook_registered",
+        "lambda",
+        "lambda_effective",
+        "lambda_worked",
+        "mem_after_gb",
+        "mem_baseline_gb",
+        "mem_before_gb",
+        "monitor_metrics",
+        "rl_retention_history",
+        "rl_reward_hack",
+        "rung",
+        "seed"
+      ]
+    },
+    {
+      "path": "results/checkpoints/cells/b4_seed0_lam8.0.json",
+      "rung": "b4",
+      "seed": 0,
+      "lambda": 8.0,
+      "gpu_seconds": 935.2075109481812,
+      "lambda_worked": {
+        "mean_logit_b0": -6.937675719797745,
+        "mean_logit_b3": -6.868369911449135,
+        "drop": -0.06930580834861022,
+        "std_logit_b0": 0.05104873957678263,
+        "relative_drop_std": -1.3576399519985611,
+        "min_drop": 0.1,
+        "min_relative_drop_std": 0.25,
+        "abs_ok": false,
+        "rel_ok": false,
+        "passed": false,
+        "outcome": "attack_too_weak",
+        "note": "attack_worked \u2192 penalty moved the score distribution; attack_too_weak \u2192 \u03bb too small vs CE (or softplus bug) \u2014 \u0394det must not be framed as probe robustness"
+      },
+      "adapter_live": {
+        "passed": true,
+        "max_abs_diff": 2.62893081526272e-07,
+        "atol": 0.0001,
+        "n": 8,
+        "grad": {
+          "grad_norm": 3.9835933421272784e-05,
+          "loss_probe": 0.0009691027225926518,
+          "min_grad_norm": 1e-08,
+          "via_dummy_param": true
+        },
+        "device": "cuda:0",
+        "scaler": {
+          "scaler_absorbed": true,
+          "normalize": true,
+          "mean_l2": 82.25490354772091,
+          "scale_mean": 1.5661886089437758,
+          "refit_on_ours": false
+        },
+        "grads_cleared": true,
+        "hook_registered": true,
+        "hook": {
+          "hook_registered": true,
+          "probe_layer": 22,
+          "probe_layers": [
+            22,
+            30,
+            40,
+            50
+          ],
+          "block_indices": {
+            "22": 21,
+            "30": 29,
+            "40": 39,
+            "50": 49
+          },
+          "indexing": "apollo_hidden_states",
+          "n_layers_model": 80,
+          "n_hooks": 4
+        },
+        "grads_cleared_before_train": true
+      },
+      "continue_from_b3": false,
+      "monitor_metrics": {
+        "recall": {
+          "linear_probe": {
+            "b4": 0.9655172413793104
+          },
+          "surface": {
+            "b4": 0.896551724137931
+          },
+          "cot_reading": {
+            "b4": 0.034482758620689655
+          }
+        },
+        "auroc": {
+          "linear_probe": {
+            "b4": 0.7457370215990906
+          },
+          "surface": {
+            "b4": 0.6798029556650247
+          },
+          "cot_reading": {
+            "b4": 0.5003789314134142
+          }
+        },
+        "alpha": {
+          "linear_probe": 0.01,
+          "surface": 0.05,
+          "cot_reading": 0.05
+        },
+        "note": "Per-cell; aggregate with scripts/aggregate_cells.py"
+      },
+      "raw_keys": [
+        "adapter_live",
+        "budget_steps",
+        "budget_tokens",
+        "continue_from_b3",
+        "gpu_seconds",
+        "hook_registered",
+        "lambda",
+        "lambda_effective",
+        "lambda_worked",
+        "mem_after_gb",
+        "mem_baseline_gb",
+        "mem_before_gb",
+        "monitor_metrics",
+        "rl_retention_history",
+        "rl_reward_hack",
+        "rung",
+        "seed"
+      ]
+    }
+  ],
+  "roots": [
+    "results/checkpoints/cells"
+  ],
+  "n_files": 5
+}

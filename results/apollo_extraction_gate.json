@@ -1,0 +1,67 @@
+{
+  "stage": 2,
+  "stage_name": "apollo_extraction_path_gate",
+  "dataset": "insider_trading__upscale",
+  "validates": [
+    "hook_placement",
+    "layer_index",
+    "response_only_pooling",
+    "response_span_boundary",
+    "same_path_as_ladder_residual",
+    "adapter_live"
+  ],
+  "path_shared_with_ladder": {
+    "extract": "src.eval.apollo_stage2.extract_acts_like_ladder \u2192 collect_residual_mean",
+    "adapter": "apollo_to_torch_adapter + assert_apollo_adapter_live (same as _make_adapter)",
+    "pooling": "mean over response tokens only (not per-token storage)"
+  },
+  "model": "meta-llama/Llama-3.3-70B-Instruct",
+  "model_source": "meta-official-fp16",
+  "dtype": "float16",
+  "quantization": null,
+  "indexing": "apollo_hidden_states[L] (== layers[L-1] output)",
+  "probe_layer": 22,
+  "n": 256,
+  "n_pos": 128,
+  "n_neg": 128,
+  "n_span_asserts": 256,
+  "n_paired": 195,
+  "n_paired_apollo_scores": 195,
+  "SPEARMAN_MIN_PAIRS": 50,
+  "gate_mode": "spearman_and_auroc",
+  "pooled_response_tokens": {
+    "median": 69.5,
+    "mean": 72.2421875,
+    "n": 256,
+    "note": "Compare to ladder response_length_stats.pooled_response_tokens.median"
+  },
+  "auroc": 0.99920654296875,
+  "spearman": 0.9938953535418926,
+  "spearman_vs_apollo": 0.9938953535418926,
+  "pearson_vs_apollo": 0.9962291686758319,
+  "hard_gate": "spearman_and_auroc",
+  "corr_min": 0.99,
+  "lo": 0.99,
+  "hi": 0.999,
+  "near_miss_band": [
+    0.96,
+    0.99
+  ],
+  "gate": "PASS",
+  "adapter_live": {
+    "passed": true,
+    "max_abs_diff": 2.6556417598300186e-07
+  },
+  "score_diagnostics": {
+    "max_abs_diff_adapter": 2.6556417598300186e-07,
+    "max_abs_diff_vs_apollo": 4.866716761654632,
+    "score_shift": -2.0690049511000543,
+    "score_scale": 0.053637040060324014,
+    "note": "score_shift = mean(ours\u2212apollo); score_scale = std(ours)/std(apollo). If Spearman disappoints: outliers \u2192 large max_abs_diff; global distortion \u2192 large |shift| or scale\u226a1 or \u226b1."
+  },
+  "max_abs_diff": 2.6556417598300186e-07,
+  "score_shift": -2.0690049511000543,
+  "score_scale": 0.053637040060324014,
+  "transcripts": "/root/project/third_party/apollo_eval/stage2_insider_trading.jsonl",
+  "note": "gate_mode=spearman_and_auroc: Spearman=0.9939 (need \u22650.99) AND AUROC=0.9992 (need \u22650.99) on n_paired=195 (\u226550). Extraction validated."
+}
