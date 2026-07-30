@@ -86,35 +86,50 @@ class LinearProbe:
         self._fitted = True
         return self
 
-    def score(self, examples: Sequence[Union[ActivationExample, np.ndarray]]) -> np.ndarray:
-        """Return deception scores (higher = more deceptive)."""
+    def _stack_activations(
+        self, examples: Sequence[Union[ActivationExample, np.ndarray]]
+    ) -> np.ndarray:
         rows = []
         for ex in examples:
             if isinstance(ex, np.ndarray):
                 rows.append(_mean_pool(ex))
             else:
                 rows.append(_mean_pool(ex.activation))
-        X = np.vstack(rows)
+        return np.vstack(rows)
+
+    def decision_score(
+        self, examples: Sequence[Union[ActivationExample, np.ndarray]]
+    ) -> np.ndarray:
+        """Signed deception logit (higher = more deceptive). Use for adaptive loss."""
+        from src.monitors.probe_adapter import sklearn_decision_scores
+
+        X = self._stack_activations(examples)
         if not self._fitted:
-            # Unfitted: project onto first PC of X as a weak score
             Xc = X - X.mean(axis=0, keepdims=True)
+            _, _, vt = np.linalg.svd(Xc, full_matrices=False)
+            return Xc @ vt[0]
+        return sklearn_decision_scores(self, X)
+
+    def score(self, examples: Sequence[Union[ActivationExample, np.ndarray]]) -> np.ndarray:
+        """Return deception scores in (0,1) for thresholded recall@FPR."""
+        rows = self._stack_activations(examples)
+        if not self._fitted:
+            Xc = rows - rows.mean(axis=0, keepdims=True)
             _, _, vt = np.linalg.svd(Xc, full_matrices=False)
             raw = Xc @ vt[0]
             return 1.0 / (1.0 + np.exp(-(raw - np.median(raw))))
 
-        Xs = self.scaler.transform(X)
+        Xs = self.scaler.transform(rows)
         if isinstance(self.clf, LogisticRegression):
             return self.clf.predict_proba(Xs)[:, 1]
         # RidgeClassifier: decision_function → sigmoid
-        dec = self.clf.decision_function(Xs)
-        if dec.ndim > 1:
-            dec = dec[:, 1] if dec.shape[1] > 1 else dec.ravel()
+        dec = self.decision_score(examples)
         return 1.0 / (1.0 + np.exp(-dec))
 
     def softplus_score(self, examples: Sequence[Union[ActivationExample, np.ndarray]]) -> np.ndarray:
-        """softplus(probe_score) for probe-aware adversary loss."""
-        s = self.score(examples)
-        return np.log1p(np.exp(np.clip(s, -20, 20)))
+        """softplus(signed logit) for probe-aware adversary loss (matches paper)."""
+        s = np.clip(self.decision_score(examples), -40, 40)
+        return np.log1p(np.exp(s))
 
     def recall_at_fpr(
         self,

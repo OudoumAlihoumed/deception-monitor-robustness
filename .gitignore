@@ -18,14 +18,13 @@ HF_TOKEN
 *.pem
 secrets/
 
-# Model weights / large artifacts
-*.pt
-*.bin
-*.safetensors
-*.gguf
-results/activations/
-results/checkpoints/
-results/*.ckpt
+# Apollo eval dumps (regenerate with prepare_apollo_stage2_transcripts.py)
+third_party/apollo_eval/*.yaml
+third_party/apollo_eval/*.jsonl
+third_party/apollo_eval/*.json
+!third_party/apollo_eval/.gitkeep
+!third_party/apollo_eval/*.meta.json
+
 
 # Logs (keep JSON results)
 results/*.log

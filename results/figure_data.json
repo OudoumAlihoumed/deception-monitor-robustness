@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "source": "fixed_b2_sft50 agileai smoke + aggregate_cells + scores bootstrap",
+  "rungs": ["b0", "b1", "b2", "b3", "b4"],
+  "probe_auroc": {
+    "values": [0.830238726790451, 0.7904509283819627, 0.8935202728306175, 0.8472906403940887, 0.7457370215990906],
+    "ci_low": [0.760, 0.699, 0.835, 0.778, 0.657],
+    "ci_high": [0.899, 0.871, 0.949, 0.915, 0.828],
+  "note": "Single-seed ladder used by Table 1 AND Fig tension: b0–b2 from cells; b3/b4 = λ=8.0 cell (not pooled over λ). Bootstrap CIs from scores_by_rung.jsonl, frozen-vs-rest, n_boot=1000."
+  },
+  "probe_auroc_by_lambda": {
+    "b3_lam0.5": 0.8787419477074649,
+    "b3_lam8.0": 0.8472906403940887,
+    "b4_lam0.5": 0.8978779840848806,
+    "b4_lam8.0": 0.7457370215990906,
+    "lambda_primary": 8.0,
+    "note": "Primary Fig tension / Table 1 use λ=8.0 for b3/b4. Companion Fig results_tension_lam0.5: AUROC 0.879/0.898 and retention b4=0.31 (user figure art)."
+  },
+  "retention_frozen_rule": {
+    "values": [1.0, 0.5172413793103449, 0.8620689655172413, 0.8620689655172413, 0.13793103448275862],
+    "n_positive": [29, 15, 25, 25, 4],
+    "n_frozen": 29,
+    "note": "Primary λ=8.0 end-state frozen rule+ retention (b4=0.14). Companion λ=0.5 figure uses b4 retention 0.31."
+  },
+  "retention_frozen_rule_by_lambda": {
+    "lam8.0_b4": 0.13793103448275862,
+    "lam0.5_b4": 0.31,
+    "note": "b0–b3 shared on both companion figures; only b4 retention differs by λ in the published figures."
+  },
+  "tost_gate": {
+    "mean_task_success": [0.9, 0.8083333333333333, 0.825, 0.8166666666666667, 0.7],
+    "gate": ["baseline", "pass", "pass", "pass", "fail_broken_agent"],
+    "margin": 0.8
+  },
+  "transfer": {
+    "apollo_stage2_auroc": 0.99920654296875,
+    "agentic_b0_auroc": 0.830238726790451,
+    "agentic_b0_ci_low": 0.7529305047936861,
+    "agentic_b0_ci_high": 0.9003783274938585,
+    "smoke_gate": 0.9
+  }
+}

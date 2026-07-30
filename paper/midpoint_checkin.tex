@@ -1,0 +1,531 @@
+%%%%%%%%%%%%%%%%%%%%%%% file midpoint_checkin.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Fellowship Midpoint Check-In  --  BASE Recursive Redlines
+% Based on the Web of Conferences Journal (EDP Sciences) class.
+%
+% Compile on Overleaf (or locally) with the webofc class + woc.bst in the
+% same folder. Both figure files -- methodology_figure_last.pdf and
+% scenario_figure1.pdf -- must sit next to this file.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%% EDP Science %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%%\documentclass[option]{webofc}
+%%% "twocolumn" for typesetting an article in two columns format (default one column)
+%
+\documentclass{webofc}
+\usepackage[varg]{txfonts}   % Web of Conferences font
+\usepackage{graphicx}
+\usepackage{hyperref}
+%
+% Put here some packages required or/and some personnal commands
+%
+%
+\begin{document}
+%
+\title{Can We Trust Deception Monitors for AI Agents?
+       A Robustness-Gap Protocol and the Limits of Adaptive Evasion}
+%
+% subtitle is optionnal
+%
+%%%\subtitle{[OPTIONAL SUBTITLE]}
+\author{\firstname{Oudoum A.} \lastname{Houmed}\inst{1}\fnsep\thanks{\email{oudoum.ali-houmed@universite-paris-saclay.fr}}
+        % Add co-authors / mentors with \and if relevant
+}
+\institute{
+        Universit\'e Paris-Saclay, France
+}
+\abstract{%
+  % 4-6 sentences. Treat this as a draft of your final abstract.
+  % State (1) the problem and why it matters, (2) your approach or research
+  % question, (3) what you have done so far, and (4) the result you expect.
+  Deception monitors read an AI agent's transcript or its internal activations
+  and flag when the agent is being deceptive. They are increasingly proposed as
+  a control against loss-of-control risk, but the accuracies people publish are
+  usually measured against agents that are not trying to evade the monitor. I
+  ask a different question: how much detection survives as adversary budget
+  rises? I formalise that as a robustness gap $\Delta\mathrm{det}(b)$ on a
+  ladder from prompt pressure through SFT to RL, with AUROC as the main metric
+  and a retention gate so a broken agent is not counted as a defeated monitor.
+  So far I have finished the literature, the protocol, the run on
+  Llama-3.3-70B against the published Apollo probe, and a workshop draft with
+  the measured curves. The result is not a collapse story: the probe already
+  drops from $0.999$ to $0.83$ before any attack, and under attacks that keep
+  the agent deceptive it holds; $b_4$ only moves detection where retention
+  fails ($0.14$ at $\lambda{=}8$, $0.31$ at $\lambda{=}0.5$). What I still need
+  is writing polish and your advice on venue and whether one stronger adaptive
+  cell is required before deposit.
+}
+%
+\maketitle
+%
+\section{Introduction and motivation}
+\label{intro}
+% What problem are you working on and why does it matter? State your central
+% research question or thesis. Keep this close to publishable form; it should
+% need little change in the final paper.
+
+Large language models are now deployed as \emph{agents}: they take multi-step
+actions toward a goal, call external tools, write and execute code, and run over
+long horizons with only intermittent human review. This is exactly the setting
+in which an agent could pursue an objective its operator never sanctioned while
+presenting a compliant trajectory to whoever is watching---the concrete shape
+that loss-of-control risk takes in near-term systems~\cite{ISR2026}. The concern
+is no longer hypothetical: frontier models placed in agentic environments have
+been shown to take covert actions disabling oversight, attempting to copy
+their own weights, or strategically underperforming when a goal makes those
+actions useful, and to do so without ever being instructed to
+cheat~\cite{meinke2024,vanderweij2024}. As autonomy and deployment scale
+outpace our ability to audit every action by hand, the safety of the whole
+arrangement rests on whether the automated checks we put in place actually
+catch this behaviour. Before I discuss monitors, I need a fixed picture of
+\emph{what counts as the thing being measured}. Figure~\ref{fig-definition}
+is that picture: panel~(A) shows the overseer, the agent, a possible covert
+goal, and three monitors that only \emph{score} an episode; panel~(B) gives
+the operational label ($y{=}1$ only when the visible statement conflicts with
+the agent's internal fact \emph{and} serves that covert goal); panel~(C) shows
+that deception is localised in a multi-turn episode; panel~(D) lists the seven
+elicitation families I use. I put this figure in the introduction because every
+later claim about detection or robustness is meaningless until this labelling
+contract is clear---and because the label must not be defined by the monitor
+itself.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth,clip]{scenario_figure1.pdf}
+\caption{\textbf{What we measure: agentic deception under monitoring.}
+(A)~Problem structure: an overseer sees only the transcript; the agent may
+pursue a covert goal; surface, probe, and CoT monitors score the episode but
+do not define the label.
+(B)~Operational definition: $y{=}1$ iff the overseer-visible statement
+conflicts with the agent's internal fact \emph{and} advances the covert goal
+(scenario-defined, monitor-independent).
+(C)~Multi-turn episodes; deception is localised at one or more turns
+$t^\star$, where the visible channel $a_t$ and the internal channel $s_t$ can
+diverge.
+(D)~Seven agentic elicitation families with shared seeds across baseline and
+adversary arms.}
+\label{fig-definition}
+\end{figure}
+
+Because no human can read every action, oversight is increasingly delegated to
+an automated \emph{monitor} that reads the agent's behaviour or internal state
+and raises an alarm when it detects deception~\cite{greenblatt2023}. Two families
+of monitor dominate the literature. \emph{Black-box} monitors read only what is
+externally visible---the agent's transcript, its tool calls, and, where it is
+exposed, its chain-of-thought---and flag surface signatures of deception such
+as hedging, deflection, or inconsistency~\cite{baker2025}. \emph{White-box}
+monitors read the model's internal state directly; the most prominent are linear
+probes trained on residual-stream activations to recover a direction correlated
+with deceptive intent~\cite{goldowskydill2025,zou2023}. The reported numbers are
+striking: activation probes achieve near-ceiling recall at low false-positive
+rates on held-out scenarios~\cite{parrack2025}, and belief-elicitation benchmarks
+report that dishonesty is cleanly separable from mere factual
+error~\cite{ren2025mask}. Taken at face value, these results suggest deception in
+agents is already a largely solved detection problem.
+
+Every one of those numbers, however, shares a hidden assumption: it is measured
+against a model that is not optimising to evade the monitor. A decade of
+adversarial-robustness research has taught the field to distrust exactly this
+setup. Defenses that look strong against a weak, non-adaptive attacker
+routinely collapse once the attacker is allowed to optimise against the
+specific defense, and evaluations that omit an adaptive attacker have
+repeatedly and systematically overstated
+robustness~\cite{carlini2019,athalye2018,tramer2020}. A deception monitor is a
+defense; an agent with an incentive to deceive without being caught is an
+attacker. The mapping is exact, and it reframes the whole question. There is
+already direct evidence that the concern bites for this detector family:
+latent-space probes can be bypassed by a model that obfuscates the very
+activations they read~\cite{bailey2024}, and independent work argues that
+evaluating a deception detector under adversarial pressure is genuinely
+hard and easy to get wrong~\cite{smith2025}. What is missing is a systematic
+measurement of \emph{how fast} a monitor degrades as the adversary's effort
+increases.
+
+% State your research question or hypothesis explicitly.
+\textbf{Research question / hypothesis.} My central question is not
+\emph{how accurate is a deception monitor?} but \emph{how much does its accuracy
+fall as adversary effort rises?} I treat effort as a budget ladder---prompt,
+then SFT without the probe in the loss, then SFT and RL with the probe in the
+objective---and I define $\Delta_{\mathrm{det}}(b)$ as the drop in AUROC from
+baseline, but only on rungs where the agent is still deceiving (TOST retention
+gate). I first expected the gap to open sharply once the adversary became
+probe-aware. What I actually measured is more constrained: under the budget I
+could run, probe-aware pressure that keeps the agent deceptive does not open a
+further gap, and the rung that lowers detection also breaks retention. So usable
+evasion is limited by agent collapse, not by a clean detection drop.
+
+% Briefly say what success looks like for the full project.
+\textbf{Goal of the full project.} I want three things at the end: the code for
+the protocol; a draft arXiv / workshop paper with the measured curve on
+Llama-3.3-70B and the published Apollo probe; and an honest account of the
+limits (softplus often \texttt{attack\_too\_weak}, one seed, $b_4$ gated). The
+policy memo from the original plan is deferred; this cycle is for the scientific
+draft.
+
+
+\section{Background and related work}
+\label{sec-related}
+% Situate your project against existing work. For bibliography use \cite{RefJ}.
+% GOVERNANCE PROJECTS: relevant policy, legal frameworks, prior proposals, or
+%   institutional precedents.
+% TECHNICAL PROJECTS: prior methods, baselines, datasets, or systems you build on.
+% Delete whichever framing does not apply.
+
+My project sits at the intersection of three literatures---the measurement of
+deception in language models, the interpretability methods used to detect it,
+and the adversarial-robustness tradition that tells us how to evaluate any
+detector honestly. I take each in turn and then state precisely where my
+contribution falls.
+
+\paragraph{Measuring deception, and why the number depends on the setup.}
+Reading across the current landscape, the evaluations sort themselves into
+three families, and the disagreements between them are more informative than any
+single headline number. The first family studies \emph{active deception in
+dialogue}, where a model asserts something it does not believe---the behaviour
+catalogued in the deception survey of Park et al.~\cite{park2023}. The second
+separates \emph{honesty from accuracy}: TruthfulQA~\cite{lin2021truthfulqa}
+measures whether a model repeats human falsehoods but cannot tell a mistaken
+model from a lying one, whereas the MASK benchmark~\cite{ren2025mask} closes
+exactly that gap by eliciting the model's own belief and checking whether its
+stated answer contradicts it---so a high MASK dishonesty score is a much
+stronger claim than a low TruthfulQA score. The third family targets
+\emph{scheming, sandbagging, and hidden objectives}: Meinke et
+al.~\cite{meinke2024} show frontier models take covert actions unprompted when a
+goal makes them useful, van der Weij et al.~\cite{vanderweij2024} demonstrate a
+model can strategically underperform when it believes it is being tested, and
+Marks et al.~\cite{marks2025auditing} ask the inverse question of whether
+auditors can uncover a hidden objective after the fact. Cutting across all three
+is a fourth concern, \emph{evaluation awareness}: a model that recognises it is
+under test may behave differently precisely when it is watched, a confound the
+anti-scheming stress-testing work found to be material~\cite{schoen2025}. The
+methodological divide that runs through this work is the one that motivates my
+own: most publicly demonstrated deception is explicitly prompted, which proves
+only that a model \emph{can} lie, not that it \emph{would}; the stronger designs
+give the model a goal and an environment where deception helps but never
+instruct it to cheat.
+
+\paragraph{Detecting deception, and the signal it rests on.} Where a detector
+works today, its success very often rests on a surface cue or an off-policy
+signal. Black-box readers exploit that a deceiver's transcript tends to be
+shorter, to hedge, and to deflect, and that its chain-of-thought sometimes
+states the plan to deceive before acting on it, which chain-of-thought
+monitoring turns into an alarm~\cite{baker2025}. White-box readers operationalise
+``belief'' as an internal representation: linear probes and representation-reading
+methods recover a direction in activation space that correlates with deceptive
+intent and report high held-out accuracy~\cite{goldowskydill2025,zou2023,burns2022},
+and probes have been benchmarked to transfer from cheaply-labelled to realistic
+settings with a measurable ``black-to-white'' performance
+boost~\cite{parrack2025}. The through-line that my whole project is built to test
+is that each of these signals was measured against a model that was not
+optimising against it. That the concern is real for the white-box family
+specifically is already established: Bailey et al.~\cite{bailey2024} show
+latent-space probes can be bypassed by obfuscating the activations they read, and
+Smith, Chughtai \& Nanda~\cite{smith2025} catalogue why evaluating such a
+detector under adversarial pressure is hard, arguing that an internals-based
+detector must be shown to beat a detector reading the model's chain-of-thought---a
+requirement I adopt as a first-class control baseline rather than a caveat.
+
+\paragraph{Evaluating detectors adversarially.} From adversarial machine
+learning I import the evaluation methodology wholesale. The central lesson of
+the past decade is that a defense must be measured against an \emph{adaptive}
+attacker that knows and optimises against it: obfuscated-gradient defenses that
+appeared robust were broken once attacks were adapted to
+them~\cite{athalye2018}, adaptive attacks defeated the large majority of a
+subsequent generation of defenses~\cite{tramer2020}, and the field converged on
+explicit guidance for how robustness evaluations should be
+conducted~\cite{carlini2019}. Applied here, this says a monitor evaluation that
+omits a monitor-aware adversary is not measuring robustness at all. The related
+alignment-safety work sharpens the stakes: sleeper-agent models retain hidden
+deceptive behaviour through safety training~\cite{hubinger2024}, and AI-control
+protocols~\cite{greenblatt2023} presuppose exactly the premise I put under test---that
+a cheaper monitor will hold up against an agent working against it.
+
+\paragraph{Where my contribution falls.} The nearest result is Bailey et
+al.~\cite{bailey2024}: they show latent-space probes can be evaded in
+principle. What I add is different in kind. I move to an \emph{agentic} setting
+on a real open-weights model; I measure a budget \emph{curve}
+$\Delta_{\mathrm{det}}(b)$ rather than a single attack point; and I check
+jointly that the agent is still deceiving, so a drop in detection cannot be
+explained away as a broken model. A defender that retrains the probe is in the
+protocol for later work; I do not claim it as finished here. The gap I am
+trying to close is simple: almost nobody reports monitor accuracy as a function
+of adversary budget with a probe-aware rung---and that is the number a deployer
+actually needs.
+
+
+\section{Approach and methods}
+\label{sec-methods}
+% Describe what you are actually doing. Be concrete enough that the reader could
+% follow your reasoning or reproduce your work.
+% GOVERNANCE: analytical framework, case selection, sources, interview/document
+%   methodology, or the structure of your argument.
+% TECHNICAL: system design, model, datasets, experimental setup, metrics.
+
+Before I measure detection I fix what counts as deception, because every recall
+number is recall against that definition. As Figure~\ref{fig-definition}
+already states in the introduction, a statement is labelled deceptive only
+when it is false \emph{relative to the agent's own internal belief} and it
+serves a goal the agent was not sanctioned to pursue---a lie, not an honest
+mistake. The overseer sees only the transcript; the agent may hold a covert
+goal; surface, probe, and CoT monitors score the episode but do not define the
+label.
+
+\paragraph{Robustness gap.} For a monitor $D$ and adversary budget $b$, I define
+\[
+  \Delta\mathrm{det}_D(b) \;=\; \mathrm{AUROC}_D(0)
+                              \;-\; \mathrm{AUROC}_D(b),
+\]
+where $b=0$ is the baseline with no adversary. I lead with AUROC because, on
+this cohort, probe scores sit very close to the $1\%$ FPR threshold, so recall
+jumps around with small threshold changes. The thing I care about is the
+\emph{curve} over $b$, and only on rungs that pass retention.
+
+\paragraph{Adversary-budget ladder.} The adversary is an ordered ladder:
+\begin{itemize}
+\item $b_1$ --- prompt instruction to conceal; no weight updates;
+\item $b_2$ --- SFT that suppresses surface cues, probe \emph{not} in the loss
+(so any probe drop here is transfer);
+\item $b_3$ --- SFT with
+$\lambda\,\mathrm{softplus}(D_{\mathrm{probe}})$ on the signed logit
+($\lambda\in\{0.5,8.0\}$)---this is the main probe-aware contrast;
+\item $b_4$ --- independent LoRA REINFORCE with a joint retention / probe /
+surface reward (in the spirit of RL-Obfuscation).
+\end{itemize}
+The comparison I care about most is $b_2$ versus $b_3$.
+
+\paragraph{Monitors and controls.} Every trajectory is scored three ways: a
+black-box surface classifier, the published Apollo residual probe (layer~22,
+mean-pooled), and a CoT reader as control. The probe threshold is calibrated on
+Alpaca at $1\%$ FPR; surface and CoT on scenario benigns at $5\%$ FPR.
+Evaluation is paired on scenario seed; intervals use a session-clustered
+bootstrap. A TOST retention gate ($\ge 80\%$ of baseline deception) stops me
+from counting a broken agent as a defeated monitor.
+
+Figure~\ref{fig-methodology} puts the pieces in order: build episodes and score
+them, raise budget $b_0$--$b_4$, then report $\Delta\mathrm{det}(b)$ only when
+retention passes. I include the figure because without the gate, the softplus
+\texttt{attack\_too\_weak} logs and the $b_4$ collapse would be easy to
+misread.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth,clip]{methodology_figure_last.pdf}
+\caption{The measurement protocol.
+(1)~Paired episodes from 7 families; scenario label; three monitors; AUROC
+as the main metric.
+(2)~Adversary ladder $b_0$--$b_4$ (hatched rungs put the probe in the objective).
+(3)~Report $\Delta\mathrm{det}(b)$ only if retention $\ge 80\%$ (TOST);
+otherwise withhold it as a broken agent.
+Main contrast: $b_2$ vs.\ $b_3$.}
+\label{fig-methodology}
+\end{figure}
+
+\subsection{Scope and assumptions}
+\label{sec-scope}
+% State what is in and out of scope, and any assumptions or limitations you are
+% working under. Naming these now makes the final paper's limitations section easy.
+
+What is finished for this check-in: the literature, the positioning, the
+definition of agentic deception, the full measurement protocol, the Modal run
+on Llama-3.3-70B against the published Apollo probe, and a workshop draft
+(\texttt{main.pdf}) with five figures. What I still need from you: whether one
+stronger probe-aware cell is required before deposit, and whether to aim first
+at a NeurIPS workshop or at arXiv. The adaptive defender (retraining the probe)
+is in the protocol but I do not claim it as a finished measurement here. At
+$b_3$ I assume gradient access to the probe, which matches a developer who
+already uses probe scores in training. The confound I care about most is the
+broken-agent case: a monitor can look strong only because fine-tuning stopped
+the agent from deceiving. That is exactly what happens at $b_4$ in my run.
+
+\section{Progress so far}
+\label{sec-progress}
+% This is the heart of the midpoint report. What have you completed since you began?
+% Be specific and honest. Include preliminary findings even if incomplete or messy.
+
+The first half of the fellowship was mostly design: reading, positioning,
+definitions, and the protocol. The second half turned that into a real run on
+an open-weights agent. Concretely, I have:
+
+\begin{itemize}
+\item \textbf{Finished the literature review.} I read across deception and
+scheming, interpretability probes, and adversarial robustness, and I checked
+the arXiv identifiers rather than citing from memory.
+\item \textbf{Finished the related-work positioning.} I state where Bailey et
+al.\ and Gupta \& Jenner (RL-Obfuscation) stop, and where my protocol starts.
+\item \textbf{Finished the formal definition of agentic deception.} Conflict
+with the internal fact \emph{and} advancing a covert goal; seven elicitation
+families; Figure~\ref{fig-definition}.
+\item \textbf{Finished the methodology.} $\Delta\mathrm{det}(b)$ in AUROC, the
+$b_1$--$b_4$ ladder, the TOST retention gate, and the $\lambda$-worked check;
+Figure~\ref{fig-methodology}.
+\item \textbf{Finished the main implementation.} Llama-3.3-70B on Modal H200,
+published Apollo probe, cell checkpoints, transfer gap $0.999\to0.83$ at $b_0$,
+and tension ladders at $\lambda{=}0.5$ and $\lambda{=}8$. Softplus often logs
+\texttt{attack\_too\_weak}; I leave that in the paper instead of hiding it.
+\item \textbf{Drafted the workshop paper.} \texttt{paper/main.pdf} is compiled
+(about 10 pages) with all five figures and a clear limitations section.
+\end{itemize}
+
+\textbf{What the run shows.} Where the agent still deceives ($b_2$ and $b_3$
+pass the retention gate), probe AUROC stays at or above the $0.83$ baseline. At
+$b_4$, retention fails ($0.14$ at $\lambda{=}8$, $0.31$ at $\lambda{=}0.5$), so
+I withhold $\Delta\mathrm{det}(b_4)$. I do not want to sell that as successful
+evasion. Under the budget I ran, usable evasion is limited: the attack that
+keeps deception does not move this probe much, and the attack that moves
+detection breaks the agent.
+
+% Optional: a table summarizing milestones, status, and what remains.
+\begin{table}
+\centering
+\caption{Progress against planned milestones}
+\label{tab-progress}
+\begin{tabular}{lll}
+\hline
+Milestone & Status & Notes \\\hline
+Literature review & Done & Three fields; checked arXiv IDs \\
+Related-work positioning & Done & Bailey / RL-Obfuscation \\
+Deception definition \& scenario figure & Done & 7 families \\
+Methodology \& protocol figure & Done & Gap, ladder, TOST \\
+Implementation (Llama + Apollo) & Done & Modal H200 \\
+Measured curves (transfer + tension) & Done & $\lambda{=}8$ primary \\
+Workshop draft (\texttt{main.pdf}) & Done & $\sim$10 pages, 5 figures \\
+Stronger adaptive cell / multi-seed & Open & Need your advice \\
+Venue (workshop vs.\ arXiv) & Open & Need your advice \\\hline
+\end{tabular}
+\end{table}
+
+\section{Expected results}
+\label{sec-expected}
+% What do you expect to find or produce by the end? Distinguish what you are
+% fairly confident about from what is still open. This sets up your final paper's
+% results and discussion sections.
+\textbf{What I am fairly confident about.} Transfer already hurts before any
+attack ($0.999\to0.83$). Under my budget, probe-aware SFT that keeps the agent
+deceptive does not open a further gap. RL can lower probe AUROC, but only
+together with collapsed retention, so the protocol gates that rung. The surface
+monitor collapses under prompt concealment; the CoT control sits near chance on
+my single-turn stack.
+
+\textbf{What is still open.} Whether a harder probe-aware schedule (higher
+effective $\lambda$, longer training, or a curriculum) can open a gap
+\emph{while} retention still passes. Softplus at both $\lambda$ values was often
+\texttt{attack\_too\_weak}, so I bound robustness rather than settle it. I also
+have only one fine-tuning seed and a frozen cohort of 29, so variance is
+unmeasured.
+
+\textbf{What could change the conclusion.} If a stronger $b_3$ both moves the
+probe and passes retention, the headline would shift from ``limits of evasion''
+to a real adaptive gap---and the same protocol would report it. If you want
+that cell before deposit, that is the remaining GPU work.
+
+\section{Remaining work and timeline}
+\label{sec-plan}
+% Concrete plan for the second half. What will you do, and roughly when?
+
+The fellowship ends on Friday 31 July. The design and the primary measurement
+are done. What is left depends on your advice:
+\begin{itemize}
+\item \textbf{If we deposit now (what I prefer):} freeze \texttt{main.pdf} and
+this midpoint, polish the wording a little, no further GPU.
+\item \textbf{If you want one stronger cell:} one Modal pass with a harder
+probe-aware schedule under the same retention gate, then update the table and
+tension figure, and keep whatever the gate returns.
+\item \textbf{Venue:} NeurIPS 2026 workshop (I was looking at AI4GOOD and
+EIML3, contribution around late August) versus arXiv first.
+\end{itemize}
+I put the tick-boxes in \texttt{docs/MENTOR\_CHECKLIST.md} so we can go through
+them in the meeting.
+
+\section{Open questions for reviewers}
+\label{sec-questions}
+% Where would feedback help most? List specific questions for your mentors or
+% reviewers at this check-in.
+
+I would really value your input on four points
+(\texttt{docs/MENTOR\_CHECKLIST.md}).
+(1) \emph{Deposit bar.} Is this honest ``limits of evasion'' draft enough as
+the fellowship scientific result, or do you want one stronger adaptive cell
+first?
+(2) \emph{Compute.} With the days left, should I polish the writing or spend
+one more GPU pass?
+(3) \emph{Venue.} NeurIPS 2026 workshop first, or arXiv first?
+(4) \emph{Scale.} Is one seed and $N{=}60$ / $|\mathcal{C}|{=}29$ enough for
+deposit if the limitations are stated clearly?
+
+\section{Acknowledgments}
+....
+%
+% BibTeX or Biber users please use (the style is already called in the class,
+% ensure that the "woc.bst" style is in your local directory)
+% \bibliography{[your bibliography database]}
+%
+% Non-BibTeX users please use
+%
+\begin{thebibliography}{}
+%
+\bibitem{ISR2026}
+Y. Bengio et al., \textit{International AI Safety Report 2026}, pp. 76--83 (2026)
+
+\bibitem{jackson2026}
+K. Jackson et al., \href{https://arxiv.org/abs/2601.17225}{arXiv:2601.17225} (2026)
+
+\bibitem{goldowskydill2025}
+N. Goldowsky-Dill, B. Chughtai, S. Heimersheim, M. Hobbhahn, \href{https://arxiv.org/abs/2502.03407}{arXiv:2502.03407} (2025)
+
+\bibitem{parrack2025}
+A. Parrack, C. L. Attubato, S. Heimersheim, \href{https://arxiv.org/abs/2507.12691}{arXiv:2507.12691} (2025)
+
+\bibitem{smith2025}
+L. Smith, B. Chughtai, N. Nanda, \href{https://arxiv.org/abs/2511.22662}{arXiv:2511.22662} (2025)
+
+\bibitem{athalye2018}
+A. Athalye, N. Carlini, D. Wagner, ``Obfuscated Gradients Give a False Sense of Security,'' in \textit{ICML} (2018). \href{https://arxiv.org/abs/1802.00420}{arXiv:1802.00420}
+
+\bibitem{tramer2020}
+F. Tram\`er, N. Carlini, W. Brendel, A. Madry, ``On Adaptive Attacks to Adversarial Example Defenses,'' in \textit{NeurIPS} (2020). \href{https://arxiv.org/abs/2002.08347}{arXiv:2002.08347}
+
+\bibitem{bailey2024}
+L. Bailey et al., \href{https://arxiv.org/abs/2412.09565}{arXiv:2412.09565} (2024)
+
+\bibitem{greenblatt2023}
+R. Greenblatt, B. Shlegeris, K. Sachan, F. Roger, \href{https://arxiv.org/abs/2312.06942}{arXiv:2312.06942} (2023)
+
+\bibitem{hubinger2024}
+E. Hubinger et al., \href{https://arxiv.org/abs/2401.05566}{arXiv:2401.05566} (2024)
+
+\bibitem{park2023}
+P. S. Park, S. Goldstein, A. O'Gara, M. Chen, D. Hendrycks, \href{https://arxiv.org/abs/2308.14752}{arXiv:2308.14752} (2023)
+
+\bibitem{ren2025mask}
+R. Ren, A. Agarwal, M. Mazeika et al., \textit{The MASK Benchmark}, \href{https://arxiv.org/abs/2503.03750}{arXiv:2503.03750} (2025)
+
+\bibitem{lin2021truthfulqa}
+S. Lin, J. Hilton, O. Evans, \textit{TruthfulQA}, \href{https://arxiv.org/abs/2109.07958}{arXiv:2109.07958} (2021)
+
+\bibitem{meinke2024}
+A. Meinke, B. Schoen, J. Scheurer, M. Balesni et al., \href{https://arxiv.org/abs/2412.04984}{arXiv:2412.04984} (2024)
+
+\bibitem{vanderweij2024}
+T. van der Weij, F. Hofst\"atter, O. Jaffe et al., \href{https://arxiv.org/abs/2406.07358}{arXiv:2406.07358} (2024)
+
+\bibitem{schoen2025}
+B. Schoen, M. Balesni et al., \href{https://arxiv.org/abs/2509.15541}{arXiv:2509.15541} (2025)
+
+\bibitem{marks2025auditing}
+S. Marks, J. Treutlein et al., \href{https://arxiv.org/abs/2503.10965}{arXiv:2503.10965} (2025)
+
+\bibitem{baker2025}
+B. Baker, J. Huizinga et al., \href{https://arxiv.org/abs/2503.11926}{arXiv:2503.11926} (2025)
+
+\bibitem{zou2023}
+A. Zou, L. Phan, S. Chen et al., \textit{Representation Engineering}, \href{https://arxiv.org/abs/2310.01405}{arXiv:2310.01405} (2023)
+
+\bibitem{burns2022}
+C. Burns, H. Ye, D. Klein, J. Steinhardt, \href{https://arxiv.org/abs/2212.03827}{arXiv:2212.03827} (2022)
+
+\bibitem{carlini2019}
+N. Carlini, A. Athalye, N. Papernot et al., \href{https://arxiv.org/abs/1902.06705}{arXiv:1902.06705} (2019)
+
+\end{thebibliography}
+\end{document}
+% end of file midpoint_checkin.tex
