@@ -34,13 +34,13 @@
 
 ### Q5. How do you define deception? Isn’t that circular with the monitor?
 
-**A:** No — the label is monitor-independent. \(y=1\) only if the visible statement conflicts with the agent’s internal fact **and** that advances a covert goal. The probe and surface classifier only score; they don’t define the label.
+**A:** No — the label is monitor-independent. $y=1$ only if the visible statement conflicts with the agent’s internal fact **and** that advances a covert goal. The probe and surface classifier only score; they don’t define the label.
 
 ---
 
 ### Q6. What is Δdet / the robustness gap?
 
-**A:** It’s the drop in AUROC from baseline as adversary budget rises: \(\Delta_{\mathrm{det}}(b) = \mathrm{AUROC}(0) - \mathrm{AUROC}(b)\). I only report it on rungs where retention still passes. If the agent stops deceiving, I withhold the gap.
+**A:** It’s the drop in AUROC from baseline as adversary budget rises: $\Delta_{\mathrm{det}}(b) = \mathrm{AUROC}(0) - \mathrm{AUROC}(b)$. I only report it on rungs where retention still passes. If the agent stops deceiving, I withhold the gap.
 
 ---
 

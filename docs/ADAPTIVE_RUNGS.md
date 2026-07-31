@@ -94,7 +94,6 @@ modal run scripts/modal_app.py \
   --n-chat-calibration 1000
 ```
 
-
 Read for:
 
 | Signal | Toy expected |

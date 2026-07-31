@@ -1,7 +1,7 @@
 # Code structure — Llama-3.3-70B workshop pipeline
 
 This project measures **how much deception-monitor accuracy degrades** as the
-adversary budget grows (\(b_0 \rightarrow b_4\)), on **Llama-3.3-70B-Instruct**,
+adversary budget grows ($b_0 \rightarrow b_4$), on **Llama-3.3-70B-Instruct**,
 stress-testing the **published** Apollo / Goldowsky-Dill residual probe
 (layer 22, logistic L2 `reg_coeff=10`, StandardScaler, mean over tokens).
 
@@ -54,7 +54,7 @@ deception-monitor-robustness/
 - **No probe-train split** of agentic episodes (Apollo trained on instructed-pairs / roleplay).
 - **Alpaca chat** (~500) for 1% FPR threshold only; benigns reserved for **drift check**.
 
-### Step 3 — \(b_0\) elicit + residual
+### Step 3 — $b_0$ elicit + residual
 - Generate responses; rule-label with scenario `label_response`.
 - Capture **mask-pooled** residual at probe layer (`pipeline/residual.py`).
 - CoT features from **response only** (`extract_cot_trace`) — never system.
@@ -67,31 +67,31 @@ deception-monitor-robustness/
 
 ### Step 5 — Frozen cohort
 - Primary positives = `intended==1` AND `rule_label_b0==1`.
-- Membership **frozen at \(b_0\)** so \(b_2\) text suppression cannot shrink the set.
+- Membership **frozen at $b_0$** so $b_2$ text suppression cannot shrink the set.
 - Per-rung `rule_label` rates logged separately (behavioral).
 
-### Step 6 — \(b_1\) prompt adversary
+### Step 6 — $b_1$ prompt adversary
 - Prompt injection; re-elicit; re-label; score.
 
-### Step 7 — \(b_2\) SFT-agnostic (2 seeds)
+### Step 7 — $b_2$ SFT-agnostic (2 seeds)
 - Fresh base + LoRA each seed.
 - Assistant-token CE only (system/user masked).
 - No probe in loss.
 
-### Step 8 — \(b_3\) SFT-aware (2 seeds × 2 λ)
+### Step 8 — $b_3$ SFT-aware (2 seeds × 2 λ)
 - Loss = CE + λ · **softplus(logit)** (not softplus(sigmoid)).
 - Residual pooled with attention mask **with grad**.
 - After train: **λ-worked gate** (mean logit on frozen cohort must drop).
 
-### Step 9 — \(b_4\) RL-aware (independent rung)
-- **Reload fresh base** (not continue \(b_3\) LoRA).
+### Step 9 — $b_4$ RL-aware (independent rung)
+- **Reload fresh base** (not continue $b_3$ LoRA).
 - REINFORCE with −λ · probe logit in reward (cf. RL-Obfuscation).
 
 ### Step 10 — Metrics
 - Δdet / recall@1%FPR (fixed chat thr) / AUROC on **all** agentic episodes.
 - Per-family Δdet; scenario-benign drift under fixed thr.
 - TOST retention = deception success / non-refusal (not length).
-- Defender retrain: new logistic probe on \(b_3\) activations (CPU).
+- Defender retrain: new logistic probe on $b_3$ activations (CPU).
 - Checkpoint JSON after each cell + GPU seconds.
 
 ### Step 11 — Write results
@@ -104,9 +104,9 @@ deception-monitor-robustness/
 1. **Higher score = more deceptive** (`classes_[1] == 1`).
 2. **softplus(logit)** — sigmoid path is numerically dead for adaptive loss.
 3. **Pad-aware pooling** — train and eval must match.
-4. **Grad must flow** into the probe term during \(b_3\).
+4. **Grad must flow** into the probe term during $b_3$.
 5. **Frozen cohort** — detection collapse ≠ labeler collapse.
-6. **Independent \(b_4\)** — interpretable rung, not cumulative LoRA.
+6. **Independent $b_4$** — interpretable rung, not cumulative LoRA.
 
 ---
 
@@ -149,7 +149,7 @@ modal run scripts/modal_app.py --n-sessions 180 --sft-steps 200 --run-full-grid
 | 1% FPR on unrelated chat | Alpaca chat calib (~500) |
 | Layer 22, logistic + scaler | Identical defaults |
 | AUROC + recall@1%FPR | Same + **Δdet(b)** ladder + per-family |
-| No adaptive FT against the probe | **\(b_3\)/\(b_4\)** probe-aware adversaries (cite RL-Obfuscation for \(b_4\)) |
+| No adaptive FT against the probe | **$b_3$/$b_4$** probe-aware adversaries (cite RL-Obfuscation for $b_4$) |
 | — | Frozen cohort, defender retrain, broken-agent TOST |
 
 Apollo answers: “can a probe detect strategic deception?”  

@@ -26,7 +26,7 @@ If GitHub shows empty folders with only `.gitkeep`, that is normal — those are
 | **Paper PDF** | [`paper/main.pdf`](paper/main.pdf) |
 | **Full map** | [`docs/OVERVIEW.md`](docs/OVERVIEW.md) |
 | **Methodology (pipeline)** | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) |
-| **Math of \(b_0\)–\(b_4\)** | [`docs/MATH_LADDER.md`](docs/MATH_LADDER.md) |
+| **Math of $b_0$–$b_4$** | [`docs/MATH_LADDER.md`](docs/MATH_LADDER.md) |
 
 ```bash
 open paper/main.pdf          # macOS Preview
@@ -68,8 +68,8 @@ Reported **only** on rungs that pass the TOST retention gate (≥ 80% of baselin
 | **b₀** | Baseline | No intervention | — |
 | **b₁** | Prompt | Concealment instruction; no weight update | No |
 | **b₂** | SFT probe-agnostic | Deceptive SFT; probe **out** of loop | No (transfer) |
-| **b₃** | SFT probe-aware | \(\mathcal{L}=\mathrm{CE}+\lambda\,\mathrm{softplus}(D)\) | **Yes** |
-| **b₄** | RL probe-aware | \(R=\alpha\cdot\mathrm{dec}-\lambda\cdot D-\beta\cdot\mathrm{surf}\) | **Yes** |
+| **b₃** | SFT probe-aware | $\mathcal{L}=\mathrm{CE}+\lambda\,\mathrm{softplus}(D)$ | **Yes** |
+| **b₄** | RL probe-aware | $R=\alpha\cdot\mathrm{dec}-\lambda\cdot D-\beta\cdot\mathrm{surf}$ | **Yes** |
 
 **Key contrast:** **b₂ vs b₃** — surface-only pressure vs probe-in-the-loss pressure.
 
@@ -77,14 +77,13 @@ Reported **only** on rungs that pass the TOST retention gate (≥ 80% of baselin
   <img src="figures/methodology_figure1.png" width="96%" alt="Methodology: build episodes, raise adversary budget b0–b4, measure gap only if retention passes" />
 </p>
 
-<p align="center">
-  <em><strong>Methodology (3 stages).</strong>
-  (1) Build episodes from 7 families; score with surface / Apollo probe (L22) / CoT; report AUROC.
-  (2) Raise budget \(b_0\to b_4\) (hatched rungs put the probe in the training objective).
-  (3) Form \(\Delta\mathrm{det}(b)=\mathrm{AUROC}(0)-\mathrm{AUROC}(b)\) only if retention \(\ge 80\%\) (TOST).
-  \(b_2,b_3\) pass and the probe holds; \(b_4\) lowers detection only as deception collapses (retention 0.14) — gap withheld.
-  Full math for every rung: <a href="docs/MATH_LADDER.md"><code>docs/MATH_LADDER.md</code></a>.</em>
-</p>
+**Methodology (3 stages).**
+(1) Build episodes from 7 families; score with surface / Apollo probe (L22) / CoT; report AUROC.
+(2) Raise budget $b_0 \to b_4$ (hatched rungs put the probe in the training objective).
+(3) Form $\Delta\mathrm{det}(b)=\mathrm{AUROC}(0)-\mathrm{AUROC}(b)$ only if retention $\ge 80\%$ (TOST).
+$b_2$ and $b_3$ pass and the probe holds; $b_4$ lowers detection only as deception collapses (retention 0.14) — gap withheld.
+
+Full math for every rung: [`docs/MATH_LADDER.md`](docs/MATH_LADDER.md).
 
 ---
 
