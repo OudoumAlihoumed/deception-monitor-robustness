@@ -4,7 +4,7 @@ This page explains the math behind the project in plain language and clean
 formulas. Every display equation uses a GitHub `math` code block so it renders
 on github.com.
 
-- Methodology figure: [`figures/methodology_figure1.png`](../figures/methodology_figure1.png)
+- Methodology figure: [`figures/methodology_protocol.png`](../figures/methodology_protocol.png) ([PDF](../figures/methodology_protocol.pdf))
 - Definition figure: [`figures/scenario_figure1.png`](../figures/scenario_figure1.png)
 - Code: `scripts/generate_figures.py`, `src/adversary/budget_ladder.py`, `scripts/modal_app.py`
 
