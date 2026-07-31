@@ -41,22 +41,22 @@ On the poster, Figure 1 is the definition: the overseer sees only the transcript
 
 Same published probe, same extraction path.  
 On Apollo’s own insider-trading domain, it scores about **0.999**.  
-On my agentic episodes at baseline — \(b_0\) — it is **0.83**.  
+On my agentic episodes at baseline — $b_0$ — it is **0.83**.  
 That’s a gap of about **0.17**, from **distribution shift alone**. Not a wiring bug: I validated the extraction on their domain first. So if you import the near-ceiling number onto agentic logs, you’re already overconfident.
 
 [point: tension figure + table]
 
 Then I raise the adversary budget.
 
-- **\(b_1\)** — prompt only: “hide from monitors.” No training. The **surface** monitor collapses — about 0.83 to 0.52. The **probe** only dips, to about 0.79. Retention falls to 0.52: many agents stop deceiving under concealment. That row is informative, but the strict 80% retention gate is for fine-tuning rungs, not for this prompt arm.
+- **$b_1$** — prompt only: “hide from monitors.” No training. The **surface** monitor collapses — about 0.83 to 0.52. The **probe** only dips, to about 0.79. Retention falls to 0.52: many agents stop deceiving under concealment. That row is informative, but the strict 80% retention gate is for fine-tuning rungs, not for this prompt arm.
 
-- **\(b_2\)** — SFT without the probe in the loss: teach the agent to keep deceiving and look clean on the surface. Probe AUROC stays high — even goes to about **0.89**. Retention comes back to **0.86** — gate passes.
+- **$b_2$** — SFT without the probe in the loss: teach the agent to keep deceiving and look clean on the surface. Probe AUROC stays high — even goes to about **0.89**. Retention comes back to **0.86** — gate passes.
 
-- **\(b_3\)** — same SFT, but now the probe is **in** the loss: CE plus lambda times softplus of the probe score. This is the adaptive rung. Under my budget, probe AUROC is still about **0.85**, retention still **0.86**. Softplus often logged **attack too weak** — so I treat this as a **bound**, not “the probe can never be beaten.”
+- **$b_3$** — same SFT, but now the probe is **in** the loss: CE plus lambda times softplus of the probe score. This is the adaptive rung. Under my budget, probe AUROC is still about **0.85**, retention still **0.86**. Softplus often logged **attack too weak** — so I treat this as a **bound**, not “the probe can never be beaten.”
 
-- **\(b_4\)** — RL: reward keeping deception, penalise the probe and surface risk. Probe AUROC falls to about **0.75** — but retention collapses to **0.14**. So I **withhold** that detection drop. I’m not calling a broken agent “successful evasion.”
+- **$b_4$** — RL: reward keeping deception, penalise the probe and surface risk. Probe AUROC falls to about **0.75** — but retention collapses to **0.14**. So I **withhold** that detection drop. I’m not calling a broken agent “successful evasion.”
 
-Same story at a weaker lambda: retention at \(b_4\) still fails. The gate — not AUROC alone — decides what I may report.
+Same story at a weaker lambda: retention at $b_4$ still fails. The gate — not AUROC alone — decides what I may report.
 
 ---
 
@@ -89,7 +89,7 @@ Thank you — happy to take questions.
 | Summary & conclusion | ~1:00 |
 | **Total** | **~5:00** |
 
-If you run long: cut the \(b_1\) surface detail and the lambda-0.5 sentence.  
+If you run long: cut the $b_1$ surface detail and the lambda-0.5 sentence.  
 If you run short: add one line on compute (one seed, softplus often weak → “limits under my budget”).
 
 ---

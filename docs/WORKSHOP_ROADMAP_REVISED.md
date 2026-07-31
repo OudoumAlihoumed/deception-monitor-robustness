@@ -9,7 +9,7 @@
 
 | Old plan | **New plan (Apollo-first)** |
 |----------|------------------------|
-| \(N{=}60\), 3 seeds × 3 λ | **2 seeds × 2 λ** `{0.5, 8.0}` |
+| $N{=}60$, 3 seeds × 3 λ | **2 seeds × 2 λ** `{0.5, 8.0}` |
 | 50/50 probe-train split of agentic eps | **All ~120 deceptive → eval** (Apollo trained on instructed-pairs/roleplay) |
 | Scenario-matched calib for 1% FPR | **Alpaca chat (~500)** for 1% FPR; **60 matched benigns → drift only** |
 | Smoke: recall@1%FPR / AUROC ≳0.90 | Dual: Apollo ref AUROC ≥0.95 then agentic ≥0.90 |
@@ -20,7 +20,7 @@ Grid density is nice-to-have; sample size is fatal. Methods: state α=0.05.
 
 ## Why the archived Qwen bug matters (keep archive)
 
-`softplus(σ)` for σ∈(0,1) spans only ~0.62 nats; with λ=0.5 the probe term was numerically incapable of moving the probe → explains \(\Delta\mathrm{det}(b_3)=0\). Honest paper: ship the bug, explain it, ship the fix.
+`softplus(σ)` for σ∈(0,1) spans only ~0.62 nats; with λ=0.5 the probe term was numerically incapable of moving the probe → explains $\Delta\mathrm{det}(b_3)=0$. Honest paper: ship the bug, explain it, ship the fix.
 
 CoT `system[:400]+response` → label leakage (probe/CoT bit-identical).  
 TOST on word count → gate measured nothing.
@@ -102,7 +102,7 @@ TOST on word count → gate measured nothing.
 1. F1 pytest (\$0) — green  
 2. Meta Llama access — **approved**  
 3. Offline: Apollo reference AUROC ≥0.95 on their eval (wiring check)  
-4. F3 smoke \(N\) small — agentic AUROC ≥0.90  
+4. F3 smoke $N$ small — agentic AUROC ≥0.90  
 5. Full: Alpaca 500 + paired 180; 2×2 grid; cell checkpoints  
 6. λ-worked gate must pass before citing Δdet(b3)  
 7. E8 defender retrain  
@@ -112,7 +112,7 @@ TOST on word count → gate measured nothing.
 ## Block G — Paper (after green run)
 
 - Frame as stress-test of **published** Goldowsky-Dill probe (not a reimplementation)  
-- Cite **RL-Obfuscation** (arXiv:2506.14261) + state \(b_4\) protocol delta — **DONE in Related Work**  
+- Cite **RL-Obfuscation** (arXiv:2506.14261) + state $b_4$ protocol delta — **DONE in Related Work**  
 - Cite **Liars' Bench**; report Δdet per family — wired in JSON  
 - Independent vs cumulative ladder (C2)  
 - Frozen-cohort label protocol  
