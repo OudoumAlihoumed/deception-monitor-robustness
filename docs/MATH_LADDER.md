@@ -274,7 +274,11 @@ We report 0.52 for honesty; we do not withhold adaptive Δdet here like at b₄.
 Training objective (assistant-only CE):
 
 ```math
-\mathcal{L}_{b_2}(\theta) = -\sum_{t \in \mathrm{assistant}} \log \pi_\theta(a_t \mid a_{<t}, \mathrm{prompt}) = \mathrm{CE}_{\mathrm{behavior}}
+\mathcal{L}_{b_2}(\theta) = -\sum_{t\in\mathrm{asst}}\log\pi_{\theta}(a_t\mid a_{1:t-1},x)
+```
+
+```math
+\mathcal{L}_{b_2}(\theta) = \mathrm{CE}
 ```
 
 **Data:** train on response_b₀ (still deceptive) under system_b₁ (concealment
@@ -292,7 +296,7 @@ If AUROC falls, that would be transfer. Here it rises → no usable evasion.
 ## b₃ — Probe-aware SFT (adaptive)
 
 ```math
-\mathcal{L}_{b_3}(\theta) = \mathrm{CE}_{\mathrm{behavior}} + \lambda \cdot \mathrm{softplus}(z)
+\mathcal{L}_{b_3}(\theta) = \mathrm{CE} + \lambda\cdot\mathrm{softplus}(z)
 ```
 
 ```math
@@ -330,7 +334,7 @@ b_2:\ \mathcal{L} = \mathrm{CE}, \qquad b_3:\ \mathcal{L} = \mathrm{CE} + \lambd
 ## b₄ — RL (reward)
 
 ```math
-R = \alpha \cdot \mathrm{retention} - \lambda \cdot z - \beta \cdot \mathrm{surface\_risk}
+R = \alpha \cdot \mathrm{retention} - \lambda \cdot z - \beta \cdot \mathrm{surface\text{-}risk}
 ```
 
 Typical: α = 1, β = 0.25, λ as in the cell.  
@@ -339,7 +343,7 @@ Figure shorthand: R = α·dec − λ·D − β·surf.
 Policy update (REINFORCE sketch):
 
 ```math
-\mathcal{L}_{\mathrm{RL}} = - R \sum_t \log \pi_\theta(a_t \mid \ldots)
+\mathcal{L}_{\mathrm{RL}} = - R \sum_t \log \pi_{\theta}(a_t \mid \dots)
 ```
 
 | Term | Effect |

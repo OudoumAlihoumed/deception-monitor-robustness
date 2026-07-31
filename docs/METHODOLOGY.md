@@ -211,7 +211,7 @@ already collapsed).
 
 
 ```math
-\mathcal{L}_{b_2} = \mathcal{L}_{\mathrm{CE}} = -\sum_{t\in\mathrm{assistant}} \log \pi_\theta(a_t \mid a_{<t}, \mathrm{prompt}).
+\mathcal{L}_{b_2}=\mathrm{CE}=-\sum_{t\in\mathrm{asst}}\log\pi_{\theta}(a_t\mid a_{1:t-1},x)
 ```
 
 
@@ -239,7 +239,7 @@ Budget (full): 200 steps.
 
 
 ```math
-R = \alpha\cdot\mathrm{retention} - \lambda\cdot z - \beta\cdot\mathrm{surface\_risk},
+R = \alpha\cdot\mathrm{retention} - \lambda\cdot z - \beta\cdot\mathrm{surface\text{-}risk},
 ```
 
 
@@ -249,7 +249,7 @@ Policy gradient (single trajectory sketch):
 
 
 ```math
-\mathcal{L}_{\mathrm{RL}} = -R\cdot \sum_t \log \pi_\theta(a_t\mid\ldots).
+\mathcal{L}_{\mathrm{RL}} = -R\cdot \sum_t \log \pi_{\theta}(a_t\mid\ldots).
 ```
 
 
