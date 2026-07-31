@@ -26,7 +26,7 @@ If GitHub shows empty folders with only `.gitkeep`, that is normal — those are
 | **Paper PDF** | [`paper/main.pdf`](paper/main.pdf) |
 | **Full map** | [`docs/OVERVIEW.md`](docs/OVERVIEW.md) |
 | **Methodology (pipeline)** | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) |
-| **Math of $b_0$–$b_4$** | [`docs/MATH_LADDER.md`](docs/MATH_LADDER.md) |
+| **Math of b0–b4** | [`docs/MATH_LADDER.md`](docs/MATH_LADDER.md) |
 
 ```bash
 open paper/main.pdf          # macOS Preview
@@ -51,13 +51,15 @@ Linear probes on residual-stream activations report high held-out accuracy for s
 
 ## Primary metric
 
-The quantity we report is the **robustness gap** in threshold-free **AUROC** (recall is illustrative only):
+The quantity we report is the **robustness gap** in threshold-free **AUROC**
+(recall is illustrative only):
 
-$$
-\Delta\mathrm{det}_D(b) = \mathrm{AUROC}_D(0) - \mathrm{AUROC}_D(b)
-$$
+```text
+Δdet(b) = AUROC(0) − AUROC(b)
+```
 
-Reported **only** on rungs that pass the TOST retention gate (≥ 80% of baseline deception success). A collapsed agent is **not** counted as a defeated monitor.
+Reported **only** on rungs that pass the TOST retention gate (≥ 80% of baseline
+deception success). A collapsed agent is **not** counted as a defeated monitor.
 
 ---
 
@@ -68,8 +70,8 @@ Reported **only** on rungs that pass the TOST retention gate (≥ 80% of baselin
 | **b₀** | Baseline | No intervention | — |
 | **b₁** | Prompt | Concealment instruction; no weight update | No |
 | **b₂** | SFT probe-agnostic | Deceptive SFT; probe **out** of loop | No (transfer) |
-| **b₃** | SFT probe-aware | $\mathcal{L}=\mathrm{CE}+\lambda\,\mathrm{softplus}(D)$ | **Yes** |
-| **b₄** | RL probe-aware | $R=\alpha\cdot\mathrm{dec}-\lambda\cdot D-\beta\cdot\mathrm{surf}$ | **Yes** |
+| **b₃** | SFT probe-aware | L = CE + λ · softplus(D) | **Yes** |
+| **b₄** | RL probe-aware | R = α·dec − λ·D − β·surf | **Yes** |
 
 **Key contrast:** **b₂ vs b₃** — surface-only pressure vs probe-in-the-loss pressure.
 
@@ -79,9 +81,9 @@ Reported **only** on rungs that pass the TOST retention gate (≥ 80% of baselin
 
 **Methodology (3 stages).**
 (1) Build episodes from 7 families; score with surface / Apollo probe (L22) / CoT; report AUROC.
-(2) Raise budget $b_0 \to b_4$ (hatched rungs put the probe in the training objective).
-(3) Form $\Delta\mathrm{det}(b)=\mathrm{AUROC}(0)-\mathrm{AUROC}(b)$ only if retention $\ge 80\%$ (TOST).
-$b_2$ and $b_3$ pass and the probe holds; $b_4$ lowers detection only as deception collapses (retention 0.14) — gap withheld.
+(2) Raise budget b0 → b4 (hatched rungs put the probe in the training objective).
+(3) Form Δdet(b) = AUROC(0) − AUROC(b) only if retention ≥ 80% (TOST).
+b2 and b3 pass and the probe holds; b4 lowers detection only as deception collapses (retention 0.14) — gap withheld.
 
 Full math for every rung: [`docs/MATH_LADDER.md`](docs/MATH_LADDER.md).
 
