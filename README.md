@@ -2,7 +2,7 @@
 
 Oudoum Ali Houmed · Université Paris-Saclay · 2026
 
-I built this project during the BASE Recursive Redlines Fellowship (summer 2026), with mentorship from Krystal Jackson.
+I built this project during the BASE Recursive Redlines Fellowship (summer 2026), with mentorship from Krystal Jackson (UC Berkeley CLTC).
 
 A lie detector for a language model is only useful if it still works when the model is trying to get past it. This repo tests that for one published detector.
 
