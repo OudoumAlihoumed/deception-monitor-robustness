@@ -36,8 +36,7 @@ deception-monitor-robustness/
 │       ├── calibration_chat.py          # Alpaca negatives for 1% FPR
 │       └── metrics_ext.py
 ├── tests/test_probe_train_eval_match.py
-├── docs/WORKSHOP_ROADMAP_REVISED.md
-└── archive/                             # old Qwen run (honest bug history)
+└── docs/METHODOLOGY.md                  # full pipeline notes
 ```
 
 ---

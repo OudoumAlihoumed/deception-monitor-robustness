@@ -357,7 +357,7 @@ def make_methodology_figure():
       validate probe -> build episodes -> b0 -> b1 -> b2 -> b3 -> b4 -> read curve
 
     No lettered sub-panels and no footer legend — both were restating what the
-    caption in main.tex already says. No color coding either: red-on-two-boxes
+    figure caption already says. No color coding either: red-on-two-boxes
     with no legend in sight reads as "these two failed," not "probe in the
     loop" — a real misreading risk, not just a style note. Every box is the
     same neutral fill / black border; b3 and b4 are distinguished purely by

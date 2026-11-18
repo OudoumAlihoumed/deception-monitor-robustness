@@ -393,4 +393,3 @@ Transfer: **0.999 → 0.83**.
 ## See also
 
 - [`METHODOLOGY.md`](METHODOLOGY.md) — implementation notes  
-- [`PRACTICE_QA.md`](PRACTICE_QA.md) — spoken Q&A  

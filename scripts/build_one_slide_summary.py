@@ -249,7 +249,7 @@ def build() -> Path:
         [
             "Not probe collapse — the limit of adaptive evasion under my budget.",
             "Do not import near-ceiling probe numbers from the training domain.",
-            "Deliverable: protocol + Modal implementation + workshop draft (main.pdf).",
+            "Deliverable: protocol + Modal implementation + workshop draft.",
             "Acknowledgments: Krystal Jackson, BASE, GPU support via Modal.",
         ],
         item_size=10.5,

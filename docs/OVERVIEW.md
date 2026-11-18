@@ -12,11 +12,8 @@ GitHub keeps some empty folders with `.gitkeep` only (placeholders). Your **pape
 | **Repo README** | [`README.md`](../README.md) |
 | **Methodology (code-faithful)** | [`docs/METHODOLOGY.md`](METHODOLOGY.md) |
 | **Math of $b_0$–$b_4$ (deep)** | [`docs/MATH_LADDER.md`](MATH_LADDER.md) |
-| **Mentor checklist (decisions)** | [`docs/MENTOR_CHECKLIST.md`](MENTOR_CHECKLIST.md) |
-| **Midpoint check-in** | [`paper/midpoint_checkin.tex`](../paper/midpoint_checkin.tex) |
 | **Poster (A0)** | [`paper/poster.tex`](../paper/poster.tex) — compile on Overleaf |
 | **One-slide summary (PPTX)** | [`paper/BASE_One_Slide_Summary.pptx`](../paper/BASE_One_Slide_Summary.pptx) — regenerate: `python3 scripts/build_one_slide_summary.py` |
-| **BASE blog post (capstone)** | [`docs/BASE_BLOG_POST.md`](BASE_BLOG_POST.md) |
 
 ---
 
