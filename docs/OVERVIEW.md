@@ -9,9 +9,6 @@ GitHub keeps some empty folders with `.gitkeep` only (placeholders). Your **pape
 
 | What | Open this path |
 |------|----------------|
-| **Paper PDF (for review)** | [`paper/main.pdf`](../paper/main.pdf) |
-| **Paper source** | [`paper/main.tex`](../paper/main.tex) |
-| **References** | [`paper/references.bib`](../paper/references.bib) |
 | **Repo README** | [`README.md`](../README.md) |
 | **Methodology (code-faithful)** | [`docs/METHODOLOGY.md`](METHODOLOGY.md) |
 | **Math of $b_0$–$b_4$ (deep)** | [`docs/MATH_LADDER.md`](MATH_LADDER.md) |
@@ -20,12 +17,6 @@ GitHub keeps some empty folders with `.gitkeep` only (placeholders). Your **pape
 | **Poster (A0)** | [`paper/poster.tex`](../paper/poster.tex) — compile on Overleaf |
 | **One-slide summary (PPTX)** | [`paper/BASE_One_Slide_Summary.pptx`](../paper/BASE_One_Slide_Summary.pptx) — regenerate: `python3 scripts/build_one_slide_summary.py` |
 | **BASE blog post (capstone)** | [`docs/BASE_BLOG_POST.md`](BASE_BLOG_POST.md) |
-
-Open the PDF in Preview / Finder:
-
-```bash
-open "paper/main.pdf"
-```
 
 ---
 
@@ -72,7 +63,7 @@ results/figure_data.json         # figure point estimates
 
 | On GitHub (public) | On your laptop |
 |--------------------|----------------|
-| Code showcase + `figures/*.png` | Full `paper/` including `main.pdf` |
+| Code showcase + `figures/*.png` | `paper/` (poster, figures) |
 | `notebooks/.gitkeep` (empty) | Same — no notebooks yet |
 | `tests/.gitkeep` on remote may lag | Full `tests/test_*.py` here |
 | No private results dump required | `results/` with Modal outputs |

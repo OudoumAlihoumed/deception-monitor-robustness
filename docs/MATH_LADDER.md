@@ -394,4 +394,3 @@ Transfer: **0.999 → 0.83**.
 
 - [`METHODOLOGY.md`](METHODOLOGY.md) — implementation notes  
 - [`PRACTICE_QA.md`](PRACTICE_QA.md) — spoken Q&A  
-- [`paper/main.pdf`](../paper/main.pdf) — workshop draft  
